@@ -1,0 +1,1235 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prep Board — cook plan &amp; shopping runs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#0f201c; --ink-2:#23392f; --paper:#e9ede6; --tile:#ffffff;
+  --line:#ccd6cd; --line-soft:#e2e8e1;
+  --amber:#d79a13; --amber-ink:#8a6206; --amber-soft:#fdf3dc;
+  --paprika:#a63b2b; --paprika-soft:#f9e9e5;
+  --sage:#7d9c86; --sage-soft:#eaf0ea; --muted:#67786f;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 80px}
+
+header{background:var(--ink);color:#eef3ee;padding:26px 0 0}
+.head-in{max-width:1180px;margin:0 auto;padding:0 20px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.02em;margin:0;color:#fff}
+.brand p{margin:0;color:#9fb6a8;font-size:13.5px;max-width:44ch}
+.langs{display:flex;gap:0;border:1px solid rgba(255,255,255,.25);border-radius:9px;overflow:hidden;flex:none}
+.langs button{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;background:transparent;border:0;color:#9fb6a8;padding:7px 12px;cursor:pointer}
+.langs button:hover{color:#fff}
+.langs button[aria-pressed="true"]{background:#fff;color:var(--ink)}
+nav{display:flex;gap:4px;margin-top:22px;flex-wrap:wrap}
+nav button{font-family:var(--display);font-weight:700;font-size:13.5px;background:transparent;border:0;color:#9fb6a8;cursor:pointer;padding:10px 16px;border-radius:9px 9px 0 0}
+nav button:hover{color:#fff;background:rgba(255,255,255,.07)}
+nav button[aria-selected="true"]{background:var(--paper);color:var(--ink)}
+:focus-visible{outline:2.5px solid var(--amber);outline-offset:2px}
+
+h2{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em;margin:0 0 4px}
+h3{font-family:var(--display);font-weight:700;font-size:15px;margin:0 0 8px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.sub{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+.card{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:18px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:26px 0 14px}
+.btn{font-family:var(--display);font-weight:700;font-size:13.5px;background:var(--ink);color:#fff;border:1px solid var(--ink);padding:9px 15px;border-radius:9px;cursor:pointer}
+.btn:hover{background:var(--ink-2)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{background:#fff;border-color:var(--ink)}
+.btn.small{padding:6px 11px;font-size:12.5px}
+.btn.danger{background:transparent;color:var(--paprika);border-color:var(--line)}
+.btn.danger:hover{background:var(--paprika-soft);border-color:var(--paprika)}
+label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);margin:0 0 5px}
+input[type=text],input[type=number],input[type=date],select,textarea{font-family:var(--body);font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{font-size:14px;line-height:1.6;resize:vertical}
+textarea.mono{font-family:var(--mono);font-size:13px;line-height:1.7}
+.field{margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 16px}
+.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.empty{border:1.5px dashed var(--line);border-radius:14px;padding:30px 22px;text-align:center;color:var(--muted);background:rgba(255,255,255,.5)}
+.empty strong{display:block;font-family:var(--display);font-size:17px;color:var(--ink);margin-bottom:5px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.wd-set{display:flex;gap:6px;flex-wrap:wrap}
+.wd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;padding:8px 0;cursor:pointer;width:48px;text-align:center}
+.wd[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.wd.shop[aria-pressed="true"]{background:var(--paprika);border-color:var(--paprika)}
+
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:8px}
+.strip div{background:var(--tile);padding:13px 15px}
+.strip .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.strip .v{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01em}
+
+.cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:18px 0 8px}
+.cal-head span{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);padding-left:2px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.tile{background:var(--tile);border:1px solid var(--line-soft);border-radius:12px;padding:9px 9px 10px;min-height:120px;position:relative;display:flex;flex-direction:column;gap:6px}
+.tile.pad{background:transparent;border:0;min-height:0}
+.tile.hascook{border-color:var(--amber)}
+.tile.shopday{padding-top:24px}
+.tile .date{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.tile.today{box-shadow:0 0 0 2px var(--ink)}
+.tile.today .date{color:var(--ink);font-weight:500}
+.notch{position:absolute;top:-1px;left:-1px;background:var(--paprika);color:#fff;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:11px 0 11px 0}
+.meals{display:flex;flex-direction:column;gap:4px}
+.meal{display:flex;align-items:flex-start;gap:6px;width:100%;text-align:left;background:transparent;border:0;padding:3px 4px 3px 5px;border-radius:7px;font:inherit;color:inherit;border-left:2.5px solid var(--line-soft)}
+button.meal{cursor:pointer}
+button.meal:hover{background:var(--amber-soft)}
+.meal .slot{font-family:var(--mono);font-size:9.5px;color:var(--muted);padding-top:2px;flex:none}
+.meal .mname{font-family:var(--display);font-weight:700;font-size:12.5px;line-height:1.2;letter-spacing:-.005em;flex:1;min-width:0}
+.meal.cook{border-left-color:var(--amber)}
+.meal.again{border-left-color:var(--sage)}
+.meal.again .mname{font-weight:500;color:var(--ink-2)}
+.meal.free .mname{font-weight:500;color:var(--muted);font-family:var(--body);font-size:12px}
+.meal .rep{font-family:var(--mono);font-size:9.5px;color:var(--sage);padding-top:2px}
+.chip{font-family:var(--mono);font-size:10px;color:var(--amber-ink);background:var(--amber-soft);border:1px solid var(--amber);border-radius:999px;padding:1px 5px;transform:rotate(-8deg);flex:none;margin-top:1px}
+
+.scrim{position:fixed;inset:0;background:rgba(15,32,28,.55);display:grid;place-items:center;padding:20px;z-index:50}
+.sheet{background:var(--tile);border-radius:16px;max-width:520px;width:100%;max-height:86vh;overflow:auto;padding:22px}
+.sheet .x{float:right;background:transparent;border:0;font-size:22px;line-height:1;color:var(--muted);cursor:pointer}
+.method{white-space:pre-wrap;font-size:14px;line-height:1.6;color:var(--ink-2)}
+.pill{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin:0 5px 4px 0}
+
+.trip{background:var(--tile);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
+.trip-hd{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px;background:var(--paprika);color:#fff}
+.trip-hd .d{font-family:var(--display);font-weight:700;font-size:17px}
+.trip-hd .m{font-family:var(--mono);font-size:11.5px;color:#f6d7d1}
+.aisle{padding:12px 18px;border-top:1px solid var(--line-soft)}
+.aisle:first-of-type{border-top:0}
+.aisle h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:400}
+.item{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer}
+.item input{margin:3px 0 0;width:16px;height:16px;accent-color:var(--ink);flex:none;cursor:pointer}
+.item .q{font-family:var(--mono);font-size:13px;min-width:84px;font-variant-numeric:tabular-nums}
+.item .n{font-size:14px}
+.item .for{font-size:11.5px;color:var(--muted);margin-left:6px}
+.item.done .q,.item.done .n{text-decoration:line-through;color:var(--muted)}
+.warn{color:var(--paprika);font-size:11.5px;margin-left:6px}
+
+.rec-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:12px}
+.rec{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:15px 16px}
+.rec h3{margin-bottom:6px}
+.rec .meta{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:8px 0 10px}
+.ing{font-size:13px;color:var(--ink-2);display:flex;gap:8px;padding:2px 0}
+.ing .q{font-family:var(--mono);color:var(--muted);min-width:74px;font-size:12px}
+details{margin-top:10px}
+summary{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+.rec-actions{display:flex;gap:8px;margin-top:12px}
+table{width:100%;border-collapse:collapse}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:400;padding:0 8px 6px 0}
+td{padding:3px 8px 3px 0;vertical-align:top}
+td input,td select{padding:6px 8px;font-size:13px}
+.pantry-row td{padding-bottom:8px}
+.check{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500;color:var(--ink-2);cursor:pointer;margin:0}
+.check input{width:16px;height:16px;accent-color:var(--ink);cursor:pointer}
+.slotcard{margin-bottom:12px}
+.slotcard.off{opacity:.62}
+.slot-hd{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+
+@media (max-width:700px){
+  .cal-head{display:none}
+  .cal{grid-template-columns:1fr}
+  .tile{min-height:0}
+  .tile.pad{display:none}
+  h1{font-size:24px}
+  .meal .mname{font-size:14px}
+  .top{flex-direction:column-reverse;align-items:flex-start}
+}
+</style>
+
+<header>
+  <div class="head-in">
+    <div class="top">
+      <div class="brand">
+        <h1>Prep&nbsp;Board</h1>
+        <p id="tagline"></p>
+      </div>
+      <div class="langs" id="langs">
+        <button data-lang="en" aria-pressed="true">EN</button>
+        <button data-lang="cs" aria-pressed="false">CZ</button>
+      </div>
+    </div>
+    <nav id="nav">
+      <button data-tab="plan" aria-selected="true"></button>
+      <button data-tab="shop" aria-selected="false"></button>
+      <button data-tab="recipes" aria-selected="false"></button>
+      <button data-tab="pantry" aria-selected="false"></button>
+      <button data-tab="settings" aria-selected="false"></button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <section id="tab-plan" class="tab"></section>
+  <section id="tab-shop" class="tab" hidden></section>
+  <section id="tab-recipes" class="tab" hidden></section>
+  <section id="tab-pantry" class="tab" hidden></section>
+  <section id="tab-settings" class="tab" hidden></section>
+</div>
+<div id="modal"></div>
+
+<script>
+/* ============================================================
+   Prep Board — meal plan + shopping run generator (EN / CS)
+   ============================================================ */
+const SLOTS = ["breakfast","lunch","dinner"];
+const AISLES = ["Produce","Meat & fish","Dairy & eggs","Bakery","Frozen","Pantry","Other"];
+const SHELF = {"Produce":6,"Meat & fish":3,"Dairy & eggs":10,"Bakery":3,"Frozen":180,"Pantry":365,"Other":21};
+const UNITS = ["g","kg","ml","l","pcs","tbsp","tsp","bunch","can","pack"];
+const BASE = {g:["g",1],kg:["g",1000],ml:["ml",1],l:["ml",1000],pcs:["pcs",1],tbsp:["tbsp",1],tsp:["tsp",1],bunch:["bunch",1],can:["can",1],pack:["pack",1]};
+const WHOLE = ["pcs","can","pack","bunch"];
+// typed shorthands accepted in the paste box, both languages
+const UNIT_ALIAS = {g:"g",gram:"g",gramů:"g",kg:"kg",ml:"ml",l:"l",dl:"l",
+  pcs:"pcs",pc:"pcs",ks:"pcs",kus:"pcs",kusy:"pcs",
+  tbsp:"tbsp","lžíce":"tbsp",lzice:"tbsp","lžic":"tbsp",
+  tsp:"tsp","lžička":"tsp",lzicka:"tsp","lžičky":"tsp","lžiček":"tsp",
+  bunch:"bunch",svazek:"bunch",can:"can",plechovka:"can",konzerva:"can",
+  pack:"pack","balení":"pack",baleni:"pack"};
+
+/* ---------- language ---------- */
+const L = {
+  en:{
+    wd:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+    mo:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+    date:(d,m)=>d+" "+m,
+    slot:{breakfast:"Breakfast",lunch:"Lunch",dinner:"Dinner"},
+    ab:{breakfast:"B",lunch:"L",dinner:"D"},
+    aisle:{"Produce":"Produce","Meat & fish":"Meat & fish","Dairy & eggs":"Dairy & eggs","Bakery":"Bakery","Frozen":"Frozen","Pantry":"Pantry","Other":"Other"},
+    unit:{g:"g",kg:"kg",ml:"ml",l:"l",pcs:"pcs",tbsp:"tbsp",tsp:"tsp",bunch:"bunch",can:"can",pack:"pack"},
+    people:n=>n+(n===1?" person":" people"),
+    portions:n=>n+" portions",
+    meals:n=>n+(n===1?" meal":" meals"),
+    recipes:n=>n+(n===1?" recipe":" recipes"),
+    runs:n=>n+(n===1?" run ahead":" runs ahead"),
+    items:n=>n+" items",
+    perBatch:n=>n+" portions per batch",
+    maxRow:n=>"max "+n+(n===1?" meal":" meals")+" per batch",
+    tagged:(n,s)=>n+(n===1?" recipe":" recipes")+" tagged for "+s.toLowerCase()+".",
+    tagline:"Your recipes, turned into cooking days and dated shopping runs.",
+    nav:{plan:"Plan",shop:"Shopping",recipes:"Recipes",pantry:"Pantry",settings:"Settings"},
+    planEyebrow:"Cooking plan", nothingYet:"Nothing to cook yet",
+    emptyPlanTitle:"Add a few recipes first",
+    emptyPlanBody:"The plan fills your cooking days from the recipe shelf, then works out the shopping.",
+    addRecipe:"Add a recipe", samples:"Load 8 sample recipes",
+    planTitle:"Your cooking plan", rules:"Change the rules", reshuffle:"Reshuffle dishes",
+    kSessions:"Cook sessions", kMeals:"Meals planned", kOpen:"Meals open", kRuns:"Shopping runs", kPortions:"Portions each",
+    hintTap:"Tap any meal for the scaled ingredients and the method — that's also where you swap the dish.",
+    missing:s=>"No recipes are tagged for "+s+" — tag some on the Recipes tab.",
+    cookOn:(s,d)=>s+" · cook on "+d,
+    pBatch:f=>"×"+f+" batch", pPortions:n=>n+" portions", pFeeds:n=>"feeds "+n+(n===1?" meal":" meals"),
+    ingScaled:"Ingredients at this size", method:"Method",
+    noNotes:"No notes yet.", addThem:"Add them", eatenAt:"Eaten at",
+    swap:"Cook something else that day", auto:"Auto — let the rotation pick",
+    shopEyebrow:"Shopping",
+    shopSub:"Each item lands on the last run before you need it. Anything in your pantry is taken off first.",
+    copy:"Copy as text", clearTicks:"Clear ticks",
+    noRuns:"No runs yet", nothingBuy:"Nothing to buy",
+    nothingBuyBody:"Add recipes and cooking days, and the runs appear here.",
+    run:n=>"Run "+n, covers:s=>"covers cooking on "+s,
+    stale:"· buy this one closer to the day",
+    copied:"Shopping list copied", copyBlocked:"Copy blocked — select the text instead",
+    shelf:"Recipe shelf", edit:"Edit", del:"Delete",
+    emptyShelf:"Your recipe shelf is empty", emptyShelfBody:"Add what you actually cook — the plan only uses these.",
+    newRecipe:"New recipe", editX:n=>"Edit "+n,
+    dishName:"Dish name", dishPh:"Lentil soup",
+    portionsPerBatch:"Portions per batch",
+    maxDays:"Max meals from one batch (optional)", maxDaysPh:"use the meal's default",
+    servedAt:"Serve it at", servedHint:"Only recipes tagged for a meal can land in it.",
+    pasteLabel:"Paste ingredients — one per line, quantity first",
+    pastePh:"400 g red lentils\n2 pcs carrot\n1 l vegetable stock\n1 tsp cumin",
+    pasteHint:"Works with 500 g, 1.5 l, 1/2 pcs. The aisle is guessed — fix it below if it's wrong.",
+    addLines:"Add these lines",
+    thQty:"Qty", thUnit:"Unit", thIngredient:"Ingredient", thAisle:"Aisle", thItem:"Item",
+    addRow:"Add a row", noIng:"No ingredients yet.",
+    howToCook:"How to cook it",
+    notesPh:"Sweat the onion and carrot in oil, 5 min.\nAdd lentils, stock and cumin, simmer 25 min.\nBlend half of it, season, squeeze of lemon.\n\nKeeps 4 days in the fridge. Freezes well.",
+    notesHint:"Shown when you tap the meal on the plan, with the ingredients already scaled to that day's batch.",
+    saveRecipe:"Save recipe", cancel:"Cancel",
+    needName:"Give the recipe a name first", needIng:"Add at least one ingredient",
+    needSlot:"Pick at least one meal it's served at", saved:"Recipe saved",
+    pantryEyebrow:"What you already have", pantryTitle:"Pantry",
+    pantrySub:"Listed items are subtracted from the shopping runs, earliest need first. Names have to match the recipe wording.",
+    pantryEmpty:"Empty — everything goes on the shopping list.",
+    addItem:"Add an item", clearAll:"Clear all",
+    setEyebrow:"The rules", setTitle:"How the plan is built",
+    resetAll:"Reset everything", resetConfirm:"Clear recipes, pantry and settings?",
+    basics:"The basics",
+    peopleLabel:"How many people eat", peopleHint:"One portion each, per meal. Batches resize to match.",
+    startDay:"First day of the plan", horizon:"Days to plan",
+    noRepeat:"Days before a dish may return", noRepeatHint:"Loosens automatically if you don't have enough recipes.",
+    threeMeals:"The three meals", on:"On", off:"Off", notPlanned:"Not planned.",
+    lunchSource:"Where lunch comes from",
+    optLeftovers:"Leftovers from the night before", optOwn:"Cooked on its own schedule",
+    hintLeftovers:"Dinner batches are scaled up to cover the next day's lunch.",
+    hintOwn:"Lunch gets its own cooking days below.",
+    cookingDays:"Cooking days", maxRowLabel:"Meals from one cooking session",
+    maxRowHint:"How many times you'll eat a dish before you cook something else.",
+    maxRowHintCarry:"Counting both meals: dinner and the next day's lunch make two.",
+    whenShop:"When you shop",
+    shopHint:"The app fills the runs: each ingredient goes on the last run before the day you cook it, and flags anything that won't keep that long. It adds a run by itself if nothing comes before your first cooking day.",
+    oneOff:"Add a one-off shopping day", add:"Add", pickDate:"Pick a date first",
+    dataTitle:"Backup & transfer",
+    dataSub:"Everything is stored in this browser only. Export a file to keep a copy or move to another device.",
+    exportBtn:"Export JSON", importBtn:"Import JSON",
+    exportTitle:"Your data", download:"Download file", copyJson:"Copy",
+    exportCount:(r,p)=>r+(r===1?" recipe":" recipes")+" · "+p+(p===1?" pantry item":" pantry items")+" · settings",
+    importTitle:"Import", chooseFile:"Choose a .json file", orPaste:"or paste the JSON here",
+    mode:"What to do with it", modeReplace:"Replace everything", modeMerge:"Add the recipes to mine",
+    doImport:"Import", importBad:"That doesn't look like a Prep Board export",
+    importEmpty:"Pick a file or paste the JSON first",
+    importReplaced:"Everything replaced", importAdded:n=>n===0?"No new recipes — they were all there already":n+(n===1?" recipe added":" recipes added"),
+    downloadBlocked:"Download blocked here — copy the text instead",
+  },
+  cs:{
+    wd:["Po","Út","St","Čt","Pá","So","Ne"],
+    mo:["led","úno","bře","dub","kvě","čvn","čvc","srp","zář","říj","lis","pro"],
+    date:(d,m)=>d+". "+m,
+    slot:{breakfast:"Snídaně",lunch:"Oběd",dinner:"Večeře"},
+    ab:{breakfast:"S",lunch:"O",dinner:"V"},
+    aisle:{"Produce":"Ovoce a zelenina","Meat & fish":"Maso a ryby","Dairy & eggs":"Mléčné a vejce","Bakery":"Pečivo","Frozen":"Mražené","Pantry":"Spíž","Other":"Ostatní"},
+    unit:{g:"g",kg:"kg",ml:"ml",l:"l",pcs:"ks",
+      tbsp:["lžíce","lžíce","lžic"], tsp:["lžička","lžičky","lžiček"],
+      bunch:["svazek","svazky","svazků"], can:["plechovka","plechovky","plechovek"], pack:"balení"},
+    people:n=>n+(n===1?" osoba":n<5?" osoby":" osob"),
+    portions:n=>n+(n===1?" porce":n<5?" porce":" porcí"),
+    meals:n=>n+(n===1?" jídlo":n<5?" jídla":" jídel"),
+    recipes:n=>n+(n===1?" recept":n<5?" recepty":" receptů"),
+    runs:n=>n+(n===1?" nákup před vámi":n<5?" nákupy před vámi":" nákupů před vámi"),
+    items:n=>n+(n===1?" položka":n<5?" položky":" položek"),
+    perBatch:n=>n+(n===1?" porce":n<5?" porce":" porcí")+" na dávku",
+    maxRow:n=>"max "+n+(n===1?" jídlo":n<5?" jídla":" jídel")+" z dávky",
+    tagged:(n,s)=>"Pro "+s.toLowerCase()+" máte "+(n===1?"1 recept":n<5?n+" recepty":n+" receptů")+".",
+    tagline:"Vaše recepty proměněné v dny vaření a naplánované nákupy.",
+    nav:{plan:"Plán",shop:"Nákupy",recipes:"Recepty",pantry:"Spíž",settings:"Nastavení"},
+    planEyebrow:"Plán vaření", nothingYet:"Zatím není co vařit",
+    emptyPlanTitle:"Nejdřív přidejte pár receptů",
+    emptyPlanBody:"Plán zaplní dny vaření recepty z police a pak spočítá nákupy.",
+    addRecipe:"Přidat recept", samples:"Načíst 8 ukázkových receptů",
+    planTitle:"Váš plán vaření", rules:"Změnit pravidla", reshuffle:"Zamíchat jídla",
+    kSessions:"Vaření", kMeals:"Jídel v plánu", kOpen:"Volných jídel", kRuns:"Nákupů", kPortions:"Porcí na jídlo",
+    hintTap:"Klepněte na jídlo a uvidíte přepočítané suroviny i postup — tam jídlo taky vyměníte.",
+    missing:s=>"Pro "+s+" nemáte označený žádný recept — označte je na kartě Recepty.",
+    cookOn:(s,d)=>s+" · vaříte "+d,
+    pBatch:f=>"×"+f+" dávka", pPortions:n=>n+(n===1?" porce":n<5?" porce":" porcí"),
+    pFeeds:n=>"pokryje "+n+(n===1?" jídlo":n<5?" jídla":" jídel"),
+    ingScaled:"Suroviny v této dávce", method:"Postup",
+    noNotes:"Zatím bez postupu.", addThem:"Doplnit", eatenAt:"Sníte při",
+    swap:"Uvařit ten den něco jiného", auto:"Automaticky — vybere rotace",
+    shopEyebrow:"Nákupy",
+    shopSub:"Každá surovina padne na poslední nákup před tím, než ji potřebujete. Co máte ve spíži, se odečte.",
+    copy:"Zkopírovat jako text", clearTicks:"Zrušit odškrtnutí",
+    noRuns:"Zatím žádné nákupy", nothingBuy:"Není co kupovat",
+    nothingBuyBody:"Přidejte recepty a dny vaření a nákupy se objeví tady.",
+    run:n=>"Nákup "+n, covers:s=>"pokrývá vaření "+s,
+    stale:"· tohle kupte až blíž k datu",
+    copied:"Nákupní seznam zkopírován", copyBlocked:"Kopírování zablokováno — označte text ručně",
+    shelf:"Police s recepty", edit:"Upravit", del:"Smazat",
+    emptyShelf:"Police s recepty je prázdná", emptyShelfBody:"Přidejte, co doopravdy vaříte — plán používá jen tyhle.",
+    newRecipe:"Nový recept", editX:n=>"Upravit "+n,
+    dishName:"Název jídla", dishPh:"Čočková polévka",
+    portionsPerBatch:"Porcí na dávku",
+    maxDays:"Nejvíc jídel z jedné dávky (nepovinné)", maxDaysPh:"výchozí podle jídla",
+    servedAt:"Podává se na", servedHint:"Do jídla se dostanou jen recepty, které pro něj mají značku.",
+    pasteLabel:"Vložte suroviny — jedna na řádek, množství první",
+    pastePh:"400 g červená čočka\n2 ks mrkev\n1 l zeleninový vývar\n1 lžička kmín",
+    pasteHint:"Funguje 500 g, 1,5 l, 1/2 ks. Regál se odhadne — dole ho můžete opravit.",
+    addLines:"Přidat řádky",
+    thQty:"Množ.", thUnit:"Jednotka", thIngredient:"Surovina", thAisle:"Regál", thItem:"Položka",
+    addRow:"Přidat řádek", noIng:"Zatím žádné suroviny.",
+    howToCook:"Jak to uvařit",
+    notesPh:"Cibuli a mrkev orestujte na oleji, 5 min.\nPřidejte čočku, vývar a kmín, vařte 25 min.\nPolovinu rozmixujte, dochuťte, citron.\n\nV lednici vydrží 4 dny. Dá se zamrazit.",
+    notesHint:"Zobrazí se po klepnutí na jídlo v plánu, se surovinami přepočítanými na tu dávku.",
+    saveRecipe:"Uložit recept", cancel:"Zrušit",
+    needName:"Nejdřív recept pojmenujte", needIng:"Přidejte aspoň jednu surovinu",
+    needSlot:"Vyberte aspoň jedno jídlo, kdy se podává", saved:"Recept uložen",
+    pantryEyebrow:"Co už máte doma", pantryTitle:"Spíž",
+    pantrySub:"Položky ze seznamu se odečtou z nákupů, od nejbližší potřeby. Názvy musí sedět s recepty.",
+    pantryEmpty:"Prázdná — všechno půjde na nákupní seznam.",
+    addItem:"Přidat položku", clearAll:"Vymazat vše",
+    setEyebrow:"Pravidla", setTitle:"Jak se plán staví",
+    resetAll:"Vymazat vše", resetConfirm:"Smazat recepty, spíž i nastavení?",
+    basics:"Základ",
+    peopleLabel:"Kolik lidí jí", peopleHint:"Jedna porce na osobu a jídlo. Dávky se tomu přizpůsobí.",
+    startDay:"První den plánu", horizon:"Počet dní plánu",
+    noRepeat:"Za kolik dní se jídlo může vrátit", noRepeatHint:"Když receptů není dost, pravidlo se samo povolí.",
+    threeMeals:"Tři jídla", on:"Zapnuto", off:"Vypnuto", notPlanned:"Neplánuje se.",
+    lunchSource:"Odkud se bere oběd",
+    optLeftovers:"Zbytek z večeře předchozího dne", optOwn:"Vaří se podle vlastního rozvrhu",
+    hintLeftovers:"Dávky večeře se zvětší, aby pokryly i oběd dalšího dne.",
+    hintOwn:"Oběd má vlastní dny vaření níž.",
+    cookingDays:"Dny vaření", maxRowLabel:"Kolik jídel z jednoho vaření",
+    maxRowHint:"Kolikrát jídlo sníte, než uvaříte něco jiného.",
+    maxRowHintCarry:"Počítají se obě jídla: večeře a oběd dalšího dne jsou dvě.",
+    whenShop:"Kdy nakupujete",
+    shopHint:"Nákupy naplní aplikace sama: každá surovina jde na poslední nákup před dnem vaření a co do té doby nevydrží, to označí. Když před prvním vařením žádný nákup není, jeden si přidá.",
+    oneOff:"Přidat jednorázový nákup", add:"Přidat", pickDate:"Nejdřív vyberte datum",
+    dataTitle:"Záloha a přenos",
+    dataSub:"Všechno je uložené jen v tomhle prohlížeči. Exportem si uděláte kopii nebo data přenesete jinam.",
+    exportBtn:"Exportovat JSON", importBtn:"Importovat JSON",
+    exportTitle:"Vaše data", download:"Stáhnout soubor", copyJson:"Zkopírovat",
+    exportCount:(r,p)=>(r===1?"1 recept":r<5?r+" recepty":r+" receptů")+" · "+(p===1?"1 položka ve spíži":p<5?p+" položky ve spíži":p+" položek ve spíži")+" · nastavení",
+    importTitle:"Import", chooseFile:"Vyberte soubor .json", orPaste:"nebo sem vložte JSON",
+    mode:"Co s tím", modeReplace:"Nahradit všechno", modeMerge:"Jen přidat recepty k mým",
+    doImport:"Importovat", importBad:"Tohle nevypadá jako export z Prep Board",
+    importEmpty:"Nejdřív vyberte soubor nebo vložte JSON",
+    importReplaced:"Všechno nahrazeno",
+    importAdded:n=>n===0?"Žádný nový recept — všechny už tam byly":(n===1?"Přidán 1 recept":n<5?"Přidány "+n+" recepty":"Přidáno "+n+" receptů"),
+    downloadBlocked:"Stahování je tu zablokované — zkopírujte text",
+  }
+};
+const t = () => L[S.lang];
+
+/* ---------- aisle guessing, both languages ---------- */
+const GUESS = [
+  // checked first: things whose name contains a misleading word
+  // ("zeleninový vývar" is not produce, "kokosové mléko" is not dairy)
+  ["Pantry", /vývar|bujón|bujon|stock|broth|koření|mletá paprika|kari past|curry paste|passata|kokosov|coconut milk|krájená rajčata|chopped tomatoes|rajčata v konzervě|sušen/i],
+  ["Meat & fish", /chicken|beef|pork|lamb|mince|bacon|sausage|ham|turkey|salmon|tuna|fish|shrimp|prawn|fillet|thigh|kuř|kuře|hovězí|vepřov|jehněč|mlet[éá] maso|slanin|klobás|šunk|krůt|losos|tuňák|ryb|kreve|filet|stehn|krkovic|mleté/i],
+  ["Dairy & eggs", /milk|cheese|mozzarella|parmesan|yog|yoghurt|yogurt|butter|cream|egg|feta|quark|curd|skyr|mlék|mlíko|sýr|jogurt|máslo|smetan|vejce|vajíčk|tvaroh|šlehačk|zakysan/i],
+  ["Bakery", /bread|roll|bun|baguette|tortilla|wrap|pita|toast|croissant|chléb|chleb|rohlík|houska|bageta|toustov|pečivo|tortill|kaiser/i],
+  ["Frozen", /frozen|ice cream|mražen|zmrzlin/i],
+  ["Produce", /tomato|onion|garlic|pepper|carrot|potato|salad|lettuce|spinach|apple|banana|lemon|lime|herb|basil|parsley|coriander|cilantro|mushroom|broccoli|cauliflower|zucchini|courgette|cucumber|celery|leek|ginger|avocado|berries|berry|cabbage|green bean|rajč|cibul|česnek|paprik[au]|mrkev|brambor|salát|špenát|jablk|banán|citron|limet|bylink|bazalk|petržel|koriandr|houb|žampion|brokolic|květák|cuket|okurk|celer|pórek|zázvor|avokád|zelí|fazolk|jahod|borůvk|malin|ovoce|zelenin/i],
+  ["Pantry", /rice|pasta|noodle|flour|sugar|salt|oil|vinegar|spice|paprika|cumin|curry|chili|chilli|cinnamon|canned|tin|bean|lentil|chickpea|stock|broth|soy|coconut milk|passata|honey|mustard|oats|muesli|granola|nuts|almond|peanut|jam|seeds|rýže|rýži|těstovin|nudl|mouk|cukr|sůl|sol|olej|ocet|koření|kmín|kari|skořic|konzerv|fazol|čočk|cizrn|vývar|bujón|sójov|kokosov|passat|med|hořčic|ovesn|vločk|müsli|musli|ořech|mandl|arašíd|džem|semínk|luštěnin/i],
+];
+const guessAisle = n => (GUESS.find(([,re]) => re.test(n)) || ["Other"])[0];
+
+/* ---------- dates ---------- */
+const pad = n => String(n).padStart(2,"0");
+const d2s = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+function s2d(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d,12); }
+function addDays(s,n){ const d=s2d(s); d.setDate(d.getDate()+n); return d2s(d); }
+function wdIdx(s){ return (s2d(s).getDay()+6)%7; }
+function diffDays(a,b){ return Math.round((s2d(b)-s2d(a))/864e5); }
+function shortDate(s){ const d=s2d(s); return t().date(d.getDate(), t().mo[d.getMonth()]); }
+function human(s){ return t().wd[wdIdx(s)]+" "+shortDate(s); }
+const today = () => d2s(new Date());
+
+/* ---------- numbers ---------- */
+const round = n => Math.round(n*100)/100;
+function fmtNum(n){
+  let s = String(round(n)).replace(/\.0+$/,"");
+  return S.lang==="cs" ? s.replace(".", ",") : s;
+}
+function ulabel(u, n=1){
+  const f = t().unit[u];
+  if (!f) return u;
+  if (typeof f === "string") return f;
+  return n===1 ? f[0] : (n<5 ? f[1] : f[2]);   // czech declines its measures
+}
+function fmtQty(q, base){
+  if (base==="g"  && q>=1000) return fmtNum(q/1000)+" "+ulabel("kg",q/1000);
+  if (base==="ml" && q>=1000) return fmtNum(q/1000)+" "+ulabel("l",q/1000);
+  if (WHOLE.includes(base)){ const w = Math.ceil(q-0.001); return fmtNum(w)+" "+ulabel(base,w); }
+  return fmtNum(q)+" "+ulabel(base,q);
+}
+const uid = () => Math.random().toString(36).slice(2,9);
+const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ============================================================
+   state
+   ============================================================ */
+const KEY = "prepboard:v2", OLDKEY = "prepboard:v1";
+let S = null;
+
+function blankState(){
+  return {
+    lang: (navigator.language||"en").toLowerCase().startsWith("cs") ? "cs" : "en",
+    recipes: [], pantry: [],
+    settings: {
+      start: today(), horizon: 28, people: 2, noRepeat: 7, shopDays: [5], capUnit: "meals",
+      slots: {
+        breakfast:{on:false, cookDays:[0,1,2,3,4,5,6], maxEat:1},
+        lunch:    {on:true,  mode:"leftovers", cookDays:[0,2,4], maxEat:2},
+        dinner:   {on:true,  mode:"own", cookDays:[0,2,4,6], maxEat:4},
+      },
+    },
+    pins:{}, extraShop:[], skipShop:[], checked:{},
+  };
+}
+async function load(){
+  if (!window.storage) return null;
+  for (const k of [KEY, OLDKEY]){
+    try{ const r = await window.storage.get(k); if (r) return migrate(JSON.parse(r.value)); }
+    catch(e){ /* not stored yet */ }
+  }
+  return null;
+}
+function migrate(old){
+  const b = blankState(), s = old.settings || {};
+  const out = {...b, ...old, settings:{...b.settings, ...s}};
+  if (!s.slots){
+    out.settings.slots = JSON.parse(JSON.stringify(b.settings.slots));
+    out.settings.slots.dinner.cookDays = s.cookDays || b.settings.slots.dinner.cookDays;
+    out.settings.slots.dinner.maxEat = s.maxEat || b.settings.slots.dinner.maxEat;
+    out.settings.people = s.portions || b.settings.people;
+    out.pins = {};
+  }
+  for (const sl of SLOTS) out.settings.slots[sl] = {...b.settings.slots[sl], ...(out.settings.slots[sl]||{})};
+  if (out.settings.capUnit !== "meals"){
+    // the cap used to count days; a dinner that also feeds lunch is two meals now
+    const carried = out.settings.slots.lunch.on && out.settings.slots.lunch.mode==="leftovers";
+    out.settings.slots.dinner.maxEat = out.settings.slots.dinner.maxEat * (carried ? 2 : 1);
+    out.settings.capUnit = "meals";
+  }
+  out.recipes = (out.recipes||[]).map(r => ({slots:["lunch","dinner"], notes:"", ...r}));
+  out.lang = out.lang || b.lang;
+  return out;
+}
+let saveTimer=null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{ if (window.storage) await window.storage.set(KEY, JSON.stringify(S)); }
+    catch(e){ console.error("Could not save:", e); }
+  }, 250);
+}
+
+/* ============================================================
+   the planner
+   ============================================================ */
+function shopDates(){
+  const st=S.settings, out=new Set();
+  for (let i=0;i<st.horizon;i++){
+    const d = addDays(st.start,i);
+    if (st.shopDays.includes(wdIdx(d)) && !S.skipShop.includes(d)) out.add(d);
+  }
+  S.extraShop.forEach(d=>{ const k=diffDays(st.start,d); if (k>=0 && k<st.horizon) out.add(d); });
+  return [...out].sort();
+}
+const recipesFor = slot => S.recipes.filter(r => (r.slots||["lunch","dinner"]).includes(slot));
+
+function planSlot(slot, cfg, pool, dates, cells, sessions, perDay){
+  const st = S.settings, n = dates.length;
+  const isCook = i => cfg.cookDays.includes(wdIdx(dates[i]));
+  const lastUsed = {};
+  let i = 0;
+  while (i < n){
+    if (!isCook(i)){ i++; continue; }
+    let j=i+1; while (j<n && !isCook(j)) j++;
+    const bridge = Math.min(j-i, n-i);
+    const pinned = S.pins[dates[i]+"|"+slot];
+    let r = pinned ? pool.find(x=>x.id===pinned) : null;
+    if (!r){
+      const scored = pool.map(x=>({x, last: lastUsed[x.id] ?? -999})).sort((a,b)=>a.last-b.last);
+      r = (scored.find(s => i - s.last >= st.noRepeat) || scored[0]).x;
+    }
+    // the cap is in meals; one cooking day may feed more than one meal
+    const capMeals = Math.min(cfg.maxEat, r.maxEat || cfg.maxEat);
+    const capDays = Math.max(1, Math.floor(capMeals / perDay));
+    const span = Math.max(1, Math.min(bridge, capDays));
+    const sid = slot+"@"+dates[i];
+    sessions.push({id:sid, slot, date:dates[i], recipeId:r.id, span, consumers:span});
+    cells[dates[i]][slot] = {kind:"cook", recipeId:r.id, sid, span, dayNo:1};
+    for (let k=1;k<span;k++)
+      cells[dates[i+k]][slot] = {kind:"again", recipeId:r.id, sid, span, dayNo:k+1};
+    lastUsed[r.id] = i;
+    i += span;
+  }
+}
+
+function buildPlan(){
+  const st = S.settings, n = st.horizon;
+  const dates = []; for (let i=0;i<n;i++) dates.push(addDays(st.start,i));
+  const cells = {}; dates.forEach(d => cells[d]={});
+  const sessions = [];
+  const active = SLOTS.filter(s => st.slots[s].on);
+  const missing = [];
+
+  const carried = st.slots.lunch.on && st.slots.lunch.mode==="leftovers" && st.slots.dinner.on;
+  for (const slot of active){
+    const cfg = st.slots[slot];
+    if (slot==="lunch" && cfg.mode==="leftovers") continue;
+    const pool = recipesFor(slot);
+    if (!pool.length){ missing.push(slot); continue; }
+    // a dinner also feeds the next day's lunch when lunch runs on leftovers
+    planSlot(slot, cfg, pool, dates, cells, sessions, (carried && slot==="dinner") ? 2 : 1);
+  }
+  if (st.slots.lunch.on && st.slots.lunch.mode==="leftovers"){
+    if (!st.slots.dinner.on) missing.push("lunch");
+    for (let i=1;i<n;i++){
+      const prev = cells[dates[i-1]].dinner;
+      if (!prev) continue;
+      cells[dates[i]].lunch = {kind:"again", recipeId:prev.recipeId, sid:prev.sid, carried:true};
+      const s = sessions.find(x=>x.id===prev.sid);
+      if (s) s.consumers++;
+    }
+  }
+  for (const s of sessions){
+    const r = S.recipes.find(x=>x.id===s.recipeId) || {servings:4};
+    s.portions = s.consumers * st.people;
+    s.factor = Math.max(1, Math.ceil((s.portions/(r.servings||1))*2)/2);
+    s.made = s.factor * (r.servings||1);
+  }
+  const slotsCount = active.length || 1;
+  const filled = dates.reduce((a,d)=> a + active.filter(s=>cells[d][s]).length, 0);
+  return {dates, cells, sessions, active, missing, trips:buildTrips(sessions), filled, gaps:slotsCount*n - filled};
+}
+
+function buildTrips(sessions){
+  if (!sessions.length) return [];
+  const ordered = [...sessions].sort((a,b)=> a.date<b.date?-1:1);
+  let trips = shopDates();
+  const first = ordered[0].date;
+  if (!trips.some(t => diffDays(t, first) >= 0)){
+    const auto = diffDays(S.settings.start, first) >= 1 ? addDays(first,-1) : S.settings.start;
+    trips = [auto, ...trips].sort();
+  }
+  const needs = [];
+  for (const s of ordered){
+    const r = S.recipes.find(x=>x.id===s.recipeId);
+    if (!r) continue;
+    for (const ing of r.ingredients){
+      const [base,f] = BASE[ing.unit] || ["pcs",1];
+      needs.push({date:s.date, key:ing.name.trim().toLowerCase()+"|"+base, name:ing.name.trim(),
+                  aisle:ing.aisle || guessAisle(ing.name), base, qty:ing.qty*f*s.factor});
+    }
+  }
+  const stock = {};
+  for (const p of S.pantry){
+    const [base,f] = BASE[p.unit] || ["pcs",1];
+    const k = p.name.trim().toLowerCase()+"|"+base;
+    stock[k] = (stock[k]||0) + p.qty*f;
+  }
+  for (const need of needs){
+    const have = stock[need.key] || 0;
+    if (have <= 0) continue;
+    const used = Math.min(have, need.qty);
+    need.qty -= used; stock[need.key] = have - used;
+  }
+  const byTrip = {};
+  for (const need of needs){
+    if (need.qty <= 0.0001) continue;
+    let trip = null;
+    for (const t2 of trips) if (diffDays(t2, need.date) >= 0) trip = t2;
+    if (!trip) trip = trips[0];
+    byTrip[trip] = byTrip[trip] || {};
+    const it = byTrip[trip][need.key] = byTrip[trip][need.key] ||
+      {name:need.name, aisle:need.aisle, base:need.base, qty:0, forDates:[], stale:false};
+    it.qty += need.qty;
+    if (!it.forDates.includes(need.date)) it.forDates.push(need.date);
+    if (diffDays(trip, need.date) > (SHELF[need.aisle] ?? 14)) it.stale = true;
+  }
+  return trips.filter(x => byTrip[x] && Object.keys(byTrip[x]).length).map(x=>{
+    const items = Object.entries(byTrip[x]).map(([key,v])=>({key,...v}))
+      .sort((a,b)=> AISLES.indexOf(a.aisle)-AISLES.indexOf(b.aisle) || a.name.localeCompare(b.name));
+    const ds = items.flatMap(i=>i.forDates).sort();
+    return {date:x, items, from:ds[0], to:ds[ds.length-1]};
+  });
+}
+
+/* ============================================================
+   rendering
+   ============================================================ */
+let PLAN=null;
+function refresh(){
+  PLAN = buildPlan();
+  renderChrome(); renderPlan(); renderShop(); renderRecipes(); renderPantry(); renderSettings();
+}
+function renderChrome(){
+  document.documentElement.lang = S.lang;
+  document.getElementById("tagline").textContent = t().tagline;
+  document.querySelectorAll("#nav button").forEach(b => b.textContent = t().nav[b.dataset.tab]);
+  document.querySelectorAll("#langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang===S.lang));
+}
+function setLang(l){ S.lang = l; closeMeal(); save(); refresh(); }
+document.getElementById("langs").addEventListener("click", e=>{ if (e.target.dataset.lang) setLang(e.target.dataset.lang); });
+
+/* ---------- plan ---------- */
+function renderPlan(){
+  const el = document.getElementById("tab-plan"), st = S.settings, T = t();
+
+  if (!S.recipes.length){
+    el.innerHTML = `
+      <div class="spread"><div><p class="eyebrow">${T.planEyebrow}</p><h2>${T.nothingYet}</h2></div></div>
+      <div class="empty"><strong>${T.emptyPlanTitle}</strong>${T.emptyPlanBody}
+        <div class="row" style="justify-content:center;margin-top:16px">
+          <button class="btn" onclick="go('recipes')">${T.addRecipe}</button>
+          <button class="btn ghost" onclick="loadSamples()">${T.samples}</button>
+        </div></div>`;
+    return;
+  }
+  const {dates, cells, sessions, active, trips, filled, gaps, missing} = PLAN;
+  const tripNo = {}; trips.forEach((x,i)=> tripNo[x.date]=i+1);
+  const byId = Object.fromEntries(S.recipes.map(r=>[r.id,r]));
+  const sesById = Object.fromEntries(sessions.map(s=>[s.id,s]));
+
+  let html = "";
+  for (let i=0;i<wdIdx(dates[0]);i++) html += `<div class="tile pad"></div>`;
+  for (const date of dates){
+    const shop = tripNo[date], day = cells[date];
+    const hasCook = active.some(s => day[s] && day[s].kind==="cook");
+    const rows = active.map(slot=>{
+      const c = day[slot];
+      if (!c) return `<div class="meal free"><span class="slot">${T.ab[slot]}</span><span class="mname">—</span></div>`;
+      const r = byId[c.recipeId];
+      if (c.kind==="cook"){
+        const s = sesById[c.sid];
+        return `<button class="meal cook" onclick="openMeal('${c.sid}')">
+          <span class="slot">${T.ab[slot]}</span><span class="mname">${esc(r?r.name:"—")}</span>
+          <span class="chip">×${fmtNum(s?s.factor:1)}</span></button>`;
+      }
+      return `<button class="meal again" onclick="openMeal('${c.sid}')">
+        <span class="slot">${T.ab[slot]}</span><span class="mname">${esc(r?r.name:"—")}</span>
+        <span class="rep">${c.carried?"↩":(c.dayNo+"/"+c.span)}</span></button>`;
+    }).join("");
+    html += `<div class="tile ${hasCook?"hascook":""} ${shop?"shopday":""} ${date===today()?"today":""}">
+      ${shop?`<div class="notch">${T.run(shop)}</div>`:""}
+      <div class="date">${T.wd[wdIdx(date)]} ${shortDate(date)}</div>
+      <div class="meals">${rows}</div></div>`;
+  }
+  const miss = missing.length ? `<p class="hint">${T.missing(missing.map(m=>T.slot[m].toLowerCase()).join(" / "))}</p>` : "";
+
+  el.innerHTML = `
+    <div class="spread">
+      <div><p class="eyebrow">${human(st.start)} → ${human(addDays(st.start, st.horizon-1))} · ${T.people(st.people)}</p>
+        <h2>${T.planTitle}</h2></div>
+      <div class="row">
+        <button class="btn ghost small" onclick="go('settings')">${T.rules}</button>
+        <button class="btn small" onclick="reshuffle()">${T.reshuffle}</button>
+      </div>
+    </div>
+    <div class="strip">
+      <div><div class="k">${T.kSessions}</div><div class="v num">${sessions.length}</div></div>
+      <div><div class="k">${T.kMeals}</div><div class="v num">${filled}</div></div>
+      <div><div class="k">${T.kOpen}</div><div class="v num">${gaps}</div></div>
+      <div><div class="k">${T.kRuns}</div><div class="v num">${trips.length}</div></div>
+      <div><div class="k">${T.kPortions}</div><div class="v num">${st.people}</div></div>
+    </div>
+    ${miss}
+    <p class="hint">${T.hintTap}</p>
+    <div class="cal-head">${T.wd.map(w=>`<span>${w}</span>`).join("")}</div>
+    <div class="cal">${html}</div>`;
+}
+function reshuffle(){ S.recipes.push(S.recipes.shift()); S.pins={}; save(); refresh(); }
+
+/* ---------- meal sheet ---------- */
+function openMeal(sid){
+  const T = t();
+  const s = PLAN.sessions.find(x=>x.id===sid); if (!s) return;
+  const r = S.recipes.find(x=>x.id===s.recipeId); if (!r) return;
+  const eaten = [];
+  for (const d of PLAN.dates) for (const slot of PLAN.active){
+    const c = PLAN.cells[d][slot];
+    if (c && c.sid===sid) eaten.push(T.slot[slot].toLowerCase()+" "+human(d));
+  }
+  const pool = recipesFor(s.slot), pinKey = s.date+"|"+s.slot;
+  document.getElementById("modal").innerHTML = `
+    <div class="scrim" onclick="if(event.target===this)closeMeal()">
+      <div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(r.name)}">
+        <button class="x" onclick="closeMeal()" aria-label="×">×</button>
+        <p class="eyebrow">${T.cookOn(T.slot[s.slot], human(s.date))}</p>
+        <h2>${esc(r.name)}</h2>
+        <p class="sub" style="margin:8px 0 14px">
+          <span class="pill">${T.pBatch(fmtNum(s.factor))}</span>
+          <span class="pill">${T.pPortions(fmtNum(s.made))}</span>
+          <span class="pill">${T.pFeeds(s.consumers)}</span></p>
+        <h3>${T.ingScaled}</h3>
+        ${r.ingredients.map(i=>{
+          const [base,f]=BASE[i.unit]||["pcs",1];
+          return `<div class="ing"><span class="q">${fmtQty(i.qty*f*s.factor, base)}</span><span>${esc(i.name)}</span></div>`;
+        }).join("")}
+        <h3 style="margin-top:16px">${T.method}</h3>
+        ${r.notes && r.notes.trim() ? `<div class="method">${esc(r.notes)}</div>`
+          : `<p class="hint" style="margin:0">${T.noNotes} <button class="btn ghost small" onclick="closeMeal();go('recipes');edit('${r.id}')">${T.addThem}</button></p>`}
+        <h3 style="margin-top:18px">${T.eatenAt}</h3>
+        <p class="hint" style="margin:0">${eaten.join(" · ")}</p>
+        <div class="field" style="margin:18px 0 0">
+          <label for="swap">${T.swap}</label>
+          <select id="swap" onchange="pin('${pinKey}', this.value)">
+            <option value="">${T.auto}</option>
+            ${pool.map(x=>`<option value="${x.id}" ${x.id===r.id&&S.pins[pinKey]?"selected":""}>${esc(x.name)}</option>`).join("")}
+          </select>
+        </div>
+      </div></div>`;
+}
+function closeMeal(){ const m=document.getElementById("modal"); if (m) m.innerHTML=""; }
+function pin(key, rid){ if (rid) S.pins[key]=rid; else delete S.pins[key]; closeMeal(); save(); refresh(); }
+document.addEventListener("keydown", e=>{ if (e.key==="Escape") closeMeal(); });
+
+/* ---------- shopping ---------- */
+function renderShop(){
+  const el = document.getElementById("tab-shop"), trips = PLAN.trips, T = t();
+  if (!trips.length){
+    el.innerHTML = `<div class="spread"><div><p class="eyebrow">${T.shopEyebrow}</p><h2>${T.noRuns}</h2></div></div>
+      <div class="empty"><strong>${T.nothingBuy}</strong>${T.nothingBuyBody}</div>`;
+    return;
+  }
+  const body = trips.map((x,i)=>{
+    const groups = {};
+    x.items.forEach(it => (groups[it.aisle] = groups[it.aisle]||[]).push(it));
+    const aisles = AISLES.filter(a=>groups[a]).map(a=>`
+      <div class="aisle"><h4>${T.aisle[a]}</h4>
+        ${groups[a].map(it=>{
+          const ck = S.checked[x.date+"|"+it.key];
+          const forTxt = it.forDates.map(d=>T.wd[wdIdx(d)]+" "+s2d(d).getDate()+".").join(", ");
+          return `<label class="item ${ck?"done":""}">
+            <input type="checkbox" ${ck?"checked":""} onchange="tick('${x.date}','${it.key.replace(/'/g,"\\'")}',this.checked)">
+            <span class="q">${fmtQty(it.qty,it.base)}</span>
+            <span class="n">${esc(it.name)}<span class="for">${forTxt}</span>${it.stale?`<span class="warn">${T.stale}</span>`:""}</span>
+          </label>`;
+        }).join("")}</div>`).join("");
+    return `<div class="trip">
+      <div class="trip-hd">
+        <div><div class="d">${T.run(i+1)} · ${human(x.date)}</div>
+        <div class="m">${T.covers(human(x.from)+(x.to!==x.from?" – "+human(x.to):""))}</div></div>
+        <div class="m num">${T.items(x.items.length)}</div>
+      </div>${aisles}</div>`;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="spread">
+      <div><p class="eyebrow">${T.shopEyebrow}</p><h2>${T.runs(trips.length)}</h2>
+      <p class="sub" style="margin:4px 0 0">${T.shopSub}</p></div>
+      <div class="row">
+        <button class="btn ghost small" onclick="copyList()">${T.copy}</button>
+        <button class="btn ghost small" onclick="clearTicks()">${T.clearTicks}</button>
+      </div>
+    </div>${body}`;
+}
+function tick(date,key,on){ if(on) S.checked[date+"|"+key]=true; else delete S.checked[date+"|"+key]; save(); renderShop(); }
+function clearTicks(){ S.checked={}; save(); renderShop(); }
+function copyList(){
+  const T = t();
+  const txt = PLAN.trips.map((x,i)=>`${T.run(i+1).toUpperCase()} — ${human(x.date)}\n`+
+    x.items.map(it=>`  [ ] ${fmtQty(it.qty,it.base)}  ${it.name}`).join("\n")).join("\n\n");
+  navigator.clipboard.writeText(txt).then(()=>toast(T.copied), ()=>toast(T.copyBlocked));
+}
+function toast(msg){
+  const el=document.createElement("div"); el.textContent=msg;
+  el.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#0f201c;color:#fff;padding:11px 18px;border-radius:10px;font-size:13.5px;z-index:99";
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
+}
+
+/* ---------- recipes ---------- */
+let editing = null;
+function renderRecipes(){
+  const el = document.getElementById("tab-recipes"), T = t();
+  const list = S.recipes.length ? `<div class="rec-list">${S.recipes.map(r=>`
+    <div class="rec">
+      <h3>${esc(r.name)}</h3>
+      ${(r.slots||[]).map(s=>`<span class="pill">${T.slot[s]}</span>`).join("")}
+      <div class="meta">${T.perBatch(r.servings)}${r.maxEat?` · ${T.maxRow(r.maxEat)}`:""}</div>
+      ${r.ingredients.map(i=>`<div class="ing"><span class="q">${fmtNum(i.qty)} ${ulabel(i.unit, i.qty)}</span><span>${esc(i.name)}</span></div>`).join("")}
+      ${r.notes && r.notes.trim() ? `<details><summary>${T.method}</summary><div class="method" style="margin-top:8px">${esc(r.notes)}</div></details>`:""}
+      <div class="rec-actions">
+        <button class="btn ghost small" onclick="edit('${r.id}')">${T.edit}</button>
+        <button class="btn danger small" onclick="del('${r.id}')">${T.del}</button>
+      </div></div>`).join("")}</div>`
+    : `<div class="empty"><strong>${T.emptyShelf}</strong>${T.emptyShelfBody}
+        <div class="row" style="justify-content:center;margin-top:16px"><button class="btn ghost" onclick="loadSamples()">${T.samples}</button></div></div>`;
+  el.innerHTML = `
+    <div class="spread">
+      <div><p class="eyebrow">${T.recipes(S.recipes.length)}</p><h2>${T.shelf}</h2></div>
+      <button class="btn" onclick="edit(null)">${T.addRecipe}</button>
+    </div><div id="editor"></div>${list}`;
+  if (editing !== null) renderEditor();
+}
+function edit(id){
+  editing = id ? JSON.parse(JSON.stringify(S.recipes.find(r=>r.id===id)))
+               : {id:uid(), name:"", servings:4, maxEat:null, slots:["lunch","dinner"], notes:"", ingredients:[]};
+  editing.slots = editing.slots || ["lunch","dinner"];
+  renderRecipes();
+  document.getElementById("editor").scrollIntoView({block:"nearest"});
+}
+function del(id){
+  S.recipes = S.recipes.filter(r=>r.id!==id);
+  Object.keys(S.pins).forEach(k=>{ if (S.pins[k]===id) delete S.pins[k]; });
+  save(); refresh();
+}
+function renderEditor(){
+  const e = editing, T = t();
+  const rows = e.ingredients.map((ing,i)=>`
+    <tr>
+      <td style="width:78px"><input type="number" step="any" min="0" value="${ing.qty}" oninput="ingSet(${i},'qty',this.value)" aria-label="${T.thQty}"></td>
+      <td style="width:110px"><select onchange="ingSet(${i},'unit',this.value)" aria-label="${T.thUnit}">${UNITS.map(u=>`<option value="${u}" ${u===ing.unit?"selected":""}>${ulabel(u)}</option>`).join("")}</select></td>
+      <td><input type="text" value="${esc(ing.name)}" oninput="ingSet(${i},'name',this.value)" aria-label="${T.thIngredient}"></td>
+      <td style="width:150px"><select onchange="ingSet(${i},'aisle',this.value)" aria-label="${T.thAisle}">${AISLES.map(a=>`<option value="${a}" ${a===ing.aisle?"selected":""}>${T.aisle[a]}</option>`).join("")}</select></td>
+      <td style="width:34px"><button class="btn ghost small" onclick="ingDel(${i})" aria-label="×">×</button></td>
+    </tr>`).join("");
+  document.getElementById("editor").innerHTML = `
+    <div class="card" style="margin-bottom:20px">
+      <h3>${e.name ? T.editX(esc(e.name)) : T.newRecipe}</h3>
+      <div class="grid2">
+        <div class="field"><label for="rn">${T.dishName}</label>
+          <input id="rn" type="text" value="${esc(e.name)}" placeholder="${T.dishPh}" oninput="editing.name=this.value"></div>
+        <div class="field"><label for="rs">${T.portionsPerBatch}</label>
+          <input id="rs" type="number" min="1" step="1" value="${e.servings}" oninput="editing.servings=+this.value||1"></div>
+        <div class="field"><label for="rm">${T.maxDays}</label>
+          <input id="rm" type="number" min="1" step="1" value="${e.maxEat||""}" placeholder="${T.maxDaysPh}" oninput="editing.maxEat=+this.value||null"></div>
+      </div>
+      <div class="field">
+        <label>${T.servedAt}</label>
+        <div class="row">${SLOTS.map(s=>`<label class="check"><input type="checkbox" ${e.slots.includes(s)?"checked":""} onchange="slotTag('${s}',this.checked)">${T.slot[s]}</label>`).join("")}</div>
+        <div class="hint">${T.servedHint}</div>
+      </div>
+      <div class="field">
+        <label for="paste">${T.pasteLabel}</label>
+        <textarea id="paste" class="mono" rows="4" placeholder="${esc(T.pastePh)}"></textarea>
+        <div class="hint">${T.pasteHint}</div>
+        <button class="btn ghost small" style="margin-top:8px" onclick="parsePaste()">${T.addLines}</button>
+      </div>
+      ${e.ingredients.length ? `<table><thead><tr><th>${T.thQty}</th><th>${T.thUnit}</th><th>${T.thIngredient}</th><th>${T.thAisle}</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : `<p class="hint">${T.noIng}</p>`}
+      <div class="row" style="margin-top:8px"><button class="btn ghost small" onclick="ingAdd()">${T.addRow}</button></div>
+      <div class="field" style="margin-top:18px">
+        <label for="rnotes">${T.howToCook}</label>
+        <textarea id="rnotes" rows="7" placeholder="${esc(T.notesPh)}" oninput="editing.notes=this.value">${esc(e.notes||"")}</textarea>
+        <div class="hint">${T.notesHint}</div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" onclick="saveRecipe()">${T.saveRecipe}</button>
+        <button class="btn ghost" onclick="editing=null;renderRecipes()">${T.cancel}</button>
+      </div>
+    </div>`;
+}
+function slotTag(s,on){
+  const a = editing.slots;
+  if (on){ if(!a.includes(s)) a.push(s); } else { editing.slots = a.filter(x=>x!==s); }
+}
+function ingSet(i,f,v){ editing.ingredients[i][f] = (f==="qty")?(parseFloat(v)||0):v; if (f==="unit"||f==="aisle") renderEditor(); }
+function ingDel(i){ editing.ingredients.splice(i,1); renderEditor(); }
+function ingAdd(){ editing.ingredients.push({qty:1,unit:"pcs",name:"",aisle:"Other"}); renderEditor(); }
+function parseNum(x){
+  if (/^\d+\/\d+$/.test(x)){ const [a,b]=x.split("/").map(Number); return a/b; }
+  const n = parseFloat(x.replace(",",".")); return isNaN(n) ? null : n;
+}
+function parsePaste(){
+  const box = document.getElementById("paste");
+  box.value.split("\n").map(l=>l.trim()).filter(Boolean).forEach(line=>{
+    const parts = line.split(/\s+/);
+    let qty=1, unit="pcs";
+    const n = parseNum(parts[0]);
+    if (n !== null){
+      qty=n; parts.shift();
+      const u = parts.length ? UNIT_ALIAS[parts[0].toLowerCase().replace(/\.$/,"")] : null;
+      if (u){ unit = u; if (parts[0].toLowerCase().startsWith("dl")) qty = qty/10; parts.shift(); }
+    }
+    const name = parts.join(" ").trim();
+    if (name) editing.ingredients.push({qty, unit, name, aisle:guessAisle(name)});
+  });
+  box.value=""; renderEditor();
+}
+function saveRecipe(){
+  const T = t();
+  if (!editing.name.trim()) return toast(T.needName);
+  if (!editing.ingredients.length) return toast(T.needIng);
+  if (!editing.slots.length) return toast(T.needSlot);
+  const i = S.recipes.findIndex(r=>r.id===editing.id);
+  if (i>=0) S.recipes[i]=editing; else S.recipes.push(editing);
+  editing=null; save(); refresh(); toast(T.saved);
+}
+
+/* ---------- pantry ---------- */
+function renderPantry(){
+  const el = document.getElementById("tab-pantry"), T = t();
+  const rows = S.pantry.map((p,i)=>`
+    <tr class="pantry-row">
+      <td style="width:82px"><input type="number" step="any" min="0" value="${p.qty}" oninput="panSet(${i},'qty',this.value)" aria-label="${T.thQty}"></td>
+      <td style="width:110px"><select onchange="panSet(${i},'unit',this.value)" aria-label="${T.thUnit}">${UNITS.map(u=>`<option value="${u}" ${u===p.unit?"selected":""}>${ulabel(u)}</option>`).join("")}</select></td>
+      <td><input type="text" value="${esc(p.name)}" oninput="panSet(${i},'name',this.value)" aria-label="${T.thItem}"></td>
+      <td style="width:34px"><button class="btn ghost small" onclick="panDel(${i})" aria-label="×">×</button></td>
+    </tr>`).join("");
+  el.innerHTML = `
+    <div class="spread"><div><p class="eyebrow">${T.pantryEyebrow}</p><h2>${T.pantryTitle}</h2>
+      <p class="sub" style="margin:4px 0 0">${T.pantrySub}</p></div></div>
+    <div class="card">
+      ${S.pantry.length ? `<table><thead><tr><th>${T.thQty}</th><th>${T.thUnit}</th><th>${T.thItem}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+        : `<p class="hint" style="margin:0 0 12px">${T.pantryEmpty}</p>`}
+      <div class="row" style="margin-top:10px">
+        <button class="btn ghost small" onclick="panAdd()">${T.addItem}</button>
+        ${S.pantry.length?`<button class="btn ghost small" onclick="S.pantry=[];save();refresh()">${T.clearAll}</button>`:""}
+      </div></div>`;
+}
+function panSet(i,f,v){ S.pantry[i][f] = (f==="qty")?(parseFloat(v)||0):v; save(); PLAN=buildPlan(); renderShop(); }
+function panDel(i){ S.pantry.splice(i,1); save(); refresh(); }
+function panAdd(){ S.pantry.push({name:"",qty:1,unit:"pcs"}); save(); renderPantry(); }
+
+/* ---------- settings ---------- */
+function slotCard(slot){
+  const T = t(), cfg = S.settings.slots[slot], count = recipesFor(slot).length;
+  const leftovers = slot==="lunch" && cfg.mode==="leftovers";
+  const days = T.wd.map((w,i)=>`<button class="wd" aria-pressed="${cfg.cookDays.includes(i)}" onclick="toggleCook('${slot}',${i})">${w}</button>`).join("");
+  return `<div class="card slotcard ${cfg.on?"":"off"}">
+    <div class="slot-hd"><h3 style="margin:0">${T.slot[slot]}</h3>
+      <label class="check"><input type="checkbox" ${cfg.on?"checked":""} onchange="toggleSlot('${slot}',this.checked)">${cfg.on?T.on:T.off}</label></div>
+    ${!cfg.on ? `<p class="hint" style="margin:0">${T.notPlanned}</p>` : `
+      ${slot==="lunch" ? `
+        <div class="field"><label for="lm">${T.lunchSource}</label>
+          <select id="lm" onchange="setSlot('lunch','mode',this.value)">
+            <option value="leftovers" ${leftovers?"selected":""}>${T.optLeftovers}</option>
+            <option value="own" ${leftovers?"":"selected"}>${T.optOwn}</option>
+          </select>
+          <div class="hint">${leftovers?T.hintLeftovers:T.hintOwn}</div>
+        </div>`:""}
+      ${leftovers ? "" : `
+        <label>${T.cookingDays}</label>
+        <div class="wd-set" style="margin-bottom:14px">${days}</div>
+        <div class="grid2"><div class="field"><label>${T.maxRowLabel}</label>
+          <input type="number" min="1" max="14" value="${cfg.maxEat}" onchange="setSlot('${slot}','maxEat',+this.value||1)">
+          <div class="hint">${carries?T.maxRowHintCarry:T.maxRowHint}</div></div></div>
+        <p class="hint" style="margin-top:0">${T.tagged(count, T.slot[slot])}</p>`}
+    `}</div>`;
+}
+function renderSettings(){
+  const st = S.settings, el = document.getElementById("tab-settings"), T = t();
+  const shop = T.wd.map((w,i)=>`<button class="wd shop" aria-pressed="${st.shopDays.includes(i)}" onclick="toggleShop(${i})">${w}</button>`).join("");
+  const extra = [...S.extraShop].sort().map(d=>`<button class="btn ghost small" onclick="dropExtra('${d}')">${human(d)} ×</button>`).join(" ");
+  el.innerHTML = `
+    <div class="spread"><div><p class="eyebrow">${T.setEyebrow}</p><h2>${T.setTitle}</h2></div>
+      <button class="btn ghost small" onclick="resetAll()">${T.resetAll}</button></div>
+    <div class="card" style="margin-bottom:14px">
+      <h3>${T.basics}</h3>
+      <div class="grid2">
+        <div class="field"><label for="pe">${T.peopleLabel}</label>
+          <input id="pe" type="number" min="1" max="20" value="${st.people}" onchange="setNum('people',+this.value||1)">
+          <div class="hint">${T.peopleHint}</div></div>
+        <div class="field"><label for="sd">${T.startDay}</label>
+          <input id="sd" type="date" value="${st.start}" onchange="setNum('start',this.value)"></div>
+        <div class="field"><label for="hz">${T.horizon}</label>
+          <input id="hz" type="number" min="7" max="90" value="${st.horizon}" onchange="setNum('horizon',+this.value)"></div>
+        <div class="field"><label for="nr">${T.noRepeat}</label>
+          <input id="nr" type="number" min="0" max="30" value="${st.noRepeat}" onchange="setNum('noRepeat',+this.value)">
+          <div class="hint">${T.noRepeatHint}</div></div>
+      </div>
+    </div>
+    <p class="eyebrow" style="margin:22px 0 8px">${T.threeMeals}</p>
+    ${SLOTS.map(slotCard).join("")}
+    <div class="card" style="margin-top:14px">
+      <h3>${T.whenShop}</h3>
+      <div class="wd-set" style="margin-bottom:14px">${shop}</div>
+      <p class="hint" style="margin-top:0">${T.shopHint}</p>
+      <div class="field" style="margin-top:16px;max-width:300px">
+        <label for="ex">${T.oneOff}</label>
+        <div class="row"><input id="ex" type="date" style="flex:1"><button class="btn ghost small" onclick="addExtra()">${T.add}</button></div>
+      </div>
+      ${extra?`<div class="row">${extra}</div>`:""}
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>${T.dataTitle}</h3>
+      <p class="hint" style="margin-top:0">${T.dataSub}</p>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost small" onclick="exportSheet()">${T.exportBtn}</button>
+        <button class="btn ghost small" onclick="importSheet()">${T.importBtn}</button>
+      </div>
+    </div>`;
+}
+function setNum(k,v){ S.settings[k]=v; save(); refresh(); }
+function setSlot(slot,k,v){ S.settings.slots[slot][k]=v; save(); refresh(); }
+function toggleSlot(slot,on){ S.settings.slots[slot].on=on; save(); refresh(); }
+function toggleCook(slot,i){
+  const a = S.settings.slots[slot].cookDays, at=a.indexOf(i);
+  if (at>=0) a.splice(at,1); else a.push(i);
+  a.sort((x,y)=>x-y); save(); refresh();
+}
+function toggleShop(i){
+  const a = S.settings.shopDays, at=a.indexOf(i);
+  if (at>=0) a.splice(at,1); else a.push(i);
+  a.sort((x,y)=>x-y); save(); refresh();
+}
+function addExtra(){
+  const v = document.getElementById("ex").value;
+  if (!v) return toast(t().pickDate);
+  if (!S.extraShop.includes(v)) S.extraShop.push(v);
+  save(); refresh();
+}
+function dropExtra(d){ S.extraShop = S.extraShop.filter(x=>x!==d); save(); refresh(); }
+function resetAll(){
+  if (!confirm(t().resetConfirm)) return;
+  const lang = S.lang;
+  S = blankState(); S.lang = lang; save(); refresh(); go("plan");
+}
+
+/* ---------- backup: export / import ---------- */
+function exportPayload(){
+  return JSON.stringify({app:"prep-board", version:2, exported:new Date().toISOString(), data:S}, null, 2);
+}
+function exportSheet(){
+  const T = t(), json = exportPayload();
+  document.getElementById("modal").innerHTML = `
+    <div class="scrim" onclick="if(event.target===this)closeMeal()">
+      <div class="sheet" role="dialog" aria-modal="true" aria-label="${T.exportTitle}">
+        <button class="x" onclick="closeMeal()" aria-label="×">×</button>
+        <p class="eyebrow">${T.dataTitle}</p>
+        <h2>${T.exportTitle}</h2>
+        <p class="sub" style="margin:6px 0 14px">${T.exportCount(S.recipes.length, S.pantry.length)}</p>
+        <textarea id="exp" class="mono" rows="9" readonly onclick="this.select()">${esc(json)}</textarea>
+        <div class="row" style="margin-top:14px">
+          <button class="btn" onclick="downloadJson()">${T.download}</button>
+          <button class="btn ghost" onclick="copyJson()">${T.copyJson}</button>
+        </div>
+      </div></div>`;
+}
+function downloadJson(){
+  const T = t();
+  try{
+    const blob = new Blob([exportPayload()], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "prep-board-"+today()+".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  }catch(e){ toast(T.downloadBlocked); }
+}
+function copyJson(){
+  const T = t();
+  navigator.clipboard.writeText(exportPayload()).then(()=>toast(T.copied), ()=>{
+    const box = document.getElementById("exp"); if (box){ box.focus(); box.select(); }
+    toast(T.copyBlocked);
+  });
+}
+
+function importSheet(){
+  const T = t();
+  document.getElementById("modal").innerHTML = `
+    <div class="scrim" onclick="if(event.target===this)closeMeal()">
+      <div class="sheet" role="dialog" aria-modal="true" aria-label="${T.importTitle}">
+        <button class="x" onclick="closeMeal()" aria-label="×">×</button>
+        <p class="eyebrow">${T.dataTitle}</p>
+        <h2>${T.importTitle}</h2>
+        <div class="field" style="margin-top:14px">
+          <label for="impfile">${T.chooseFile}</label>
+          <input id="impfile" type="file" accept="application/json,.json" onchange="readImportFile(this)">
+        </div>
+        <div class="field">
+          <label for="imp">${T.orPaste}</label>
+          <textarea id="imp" class="mono" rows="6" placeholder='{"app":"prep-board", ...}'></textarea>
+        </div>
+        <div class="field">
+          <label>${T.mode}</label>
+          <label class="check" style="margin-bottom:6px"><input type="radio" name="impmode" value="replace" checked>${T.modeReplace}</label>
+          <label class="check"><input type="radio" name="impmode" value="merge">${T.modeMerge}</label>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn" onclick="doImport()">${T.doImport}</button>
+          <button class="btn ghost" onclick="closeMeal()">${T.cancel}</button>
+        </div>
+      </div></div>`;
+}
+function readImportFile(input){
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => { const box = document.getElementById("imp"); if (box) box.value = fr.result; };
+  fr.readAsText(f);
+}
+function doImport(){
+  const T = t(), box = document.getElementById("imp");
+  const raw = (box ? box.value : "").trim();
+  if (!raw) return toast(T.importEmpty);
+  let parsed;
+  try{ parsed = JSON.parse(raw); }catch(e){ return toast(T.importBad); }
+
+  const incoming = parsed && parsed.data ? parsed.data : parsed;   // wrapped or bare state
+  if (!incoming || !Array.isArray(incoming.recipes)) return toast(T.importBad);
+
+  const mode = (document.querySelector('input[name="impmode"]:checked')||{}).value || "replace";
+
+  if (mode === "merge"){
+    const have = new Set(S.recipes.map(r => r.name.trim().toLowerCase()));
+    let added = 0;
+    for (const r of incoming.recipes){
+      if (!r || !r.name || have.has(r.name.trim().toLowerCase())) continue;
+      S.recipes.push({...r, id: uid(), slots: r.slots || ["lunch","dinner"], notes: r.notes || ""});
+      have.add(r.name.trim().toLowerCase());
+      added++;
+    }
+    closeMeal(); save(); refresh(); go("recipes");
+    return toast(T.importAdded(added));
+  }
+
+  const lang = S.lang;
+  S = migrate(incoming);
+  S.lang = incoming.lang || lang;
+  if (diffDays(S.settings.start, today()) > S.settings.horizon) S.settings.start = today();
+  closeMeal(); save(); refresh(); go("plan");
+  toast(T.importReplaced);
+}
+
+/* ---------- tabs ---------- */
+function go(tab){
+  document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===tab));
+  document.querySelectorAll(".tab").forEach(s=> s.hidden = (s.id !== "tab-"+tab));
+  window.scrollTo({top:0});
+}
+document.getElementById("nav").addEventListener("click", e=>{ if (e.target.dataset.tab) go(e.target.dataset.tab); });
+
+/* ---------- samples ---------- */
+const SAMPLES = {
+  en:[
+    ["Chicken & pepper traybake",4,["lunch","dinner"],
+     "Heat the oven to 210 °C.\nToss chicken, peppers and onion wedges with oil, paprika, salt.\nRoast 35–40 min, turning once.\nCook the rice while it roasts.\n\nKeeps 3 days. Reheat covered so it doesn't dry out.",
+     [[600,"g","chicken thighs"],[300,"g","rice"],[2,"pcs","bell pepper"],[1,"pcs","onion"],[2,"tbsp","olive oil"],[1,"tsp","paprika"]]],
+    ["Red lentil soup",6,["lunch","dinner"],
+     "Sweat onion, carrot and garlic in oil, 5 min.\nAdd lentils, cumin and stock. Simmer 25 min.\nBlend half, season, finish with lemon.\n\nThickens overnight — loosen with water when reheating.",
+     [[400,"g","red lentils"],[2,"pcs","carrot"],[1,"pcs","onion"],[2,"pcs","garlic cloves"],[1,"l","vegetable stock"],[1,"tsp","cumin"]]],
+    ["Beef chili",6,["lunch","dinner"],
+     "Brown the mince hard, don't stir too early.\nAdd onion and chili flakes, 3 min.\nTomatoes and beans in, simmer 40 min uncovered.\nRice on at the 20 min mark.\n\nBetter on day two.",
+     [[500,"g","minced beef"],[2,"can","kidney beans"],[2,"can","chopped tomatoes"],[1,"pcs","onion"],[1,"tsp","chili flakes"],[250,"g","rice"]]],
+    ["Salmon with potatoes",4,["dinner"],
+     "Potatoes in salted water, 20 min.\nSalmon skin-side down in a hot pan, 4 min, flip for 1.\nBeans in with the potatoes for the last 5 min.\nButter and lemon over everything.\n\nCook fresh — this one doesn't keep well.",
+     [[500,"g","salmon fillet"],[800,"g","potatoes"],[200,"g","green beans"],[50,"g","butter"],[1,"pcs","lemon"]]],
+    ["Tomato & mozzarella pasta",4,["lunch","dinner"],
+     "Garlic in oil until it smells, not brown.\nTomatoes in, simmer 20 min, season well.\nPasta to just under al dente, finish it in the sauce.\nTorn mozzarella and basil off the heat.",
+     [[500,"g","pasta"],[2,"can","chopped tomatoes"],[250,"g","mozzarella"],[2,"pcs","garlic cloves"],[1,"bunch","basil"]]],
+    ["Cauliflower curry",4,["lunch","dinner"],
+     "Fry the curry paste in oil, 1 min.\nOnion and cauliflower in, coat well.\nCoconut milk and chickpeas, simmer 20 min until tender.\nRice alongside.\n\nKeeps 4 days, freezes fine.",
+     [[2,"can","chickpeas"],[400,"ml","coconut milk"],[1,"pcs","cauliflower"],[300,"g","rice"],[2,"tbsp","curry paste"],[1,"pcs","onion"]]],
+    ["Overnight oats",2,["breakfast"],
+     "Oats, yoghurt and milk in a jar, stir, fridge overnight.\nBerries and honey in the morning.\n\nMake three jars at once — it's the same washing up.",
+     [[100,"g","oats"],[200,"g","yoghurt"],[200,"ml","milk"],[150,"g","berries"],[1,"tbsp","honey"]]],
+    ["Eggs on toast",2,["breakfast"],
+     "Butter the pan, low heat, scramble slowly.\nToast, salt, pepper.\n\nOff the heat while still a bit wet — they finish on the plate.",
+     [[4,"pcs","eggs"],[4,"pcs","bread"],[20,"g","butter"]]],
+  ],
+  cs:[
+    ["Kuřecí plech s paprikou",4,["lunch","dinner"],
+     "Troubu na 210 °C.\nKuře, papriky a cibuli na měsíčky promíchejte s olejem, paprikou a solí.\nPečte 35–40 min, jednou obraťte.\nRýži uvařte mezitím.\n\nV lednici vydrží 3 dny. Ohřívejte přikryté, ať to nevyschne.",
+     [[600,"g","kuřecí stehna"],[300,"g","rýže"],[2,"ks","paprika"],[1,"ks","cibule"],[2,"lžíce","olivový olej"],[1,"lžička","mletá paprika"]]],
+    ["Čočková polévka",6,["lunch","dinner"],
+     "Cibuli, mrkev a česnek orestujte na oleji, 5 min.\nPřidejte čočku, kmín a vývar. Vařte 25 min.\nPolovinu rozmixujte, dochuťte, na závěr citron.\n\nPřes noc zhoustne — při ohřevu zřeďte vodou.",
+     [[400,"g","červená čočka"],[2,"ks","mrkev"],[1,"ks","cibule"],[2,"ks","stroužek česneku"],[1,"l","zeleninový vývar"],[1,"lžička","kmín"]]],
+    ["Chilli con carne",6,["lunch","dinner"],
+     "Mleté maso pořádně opečte, nemíchejte moc brzy.\nPřidejte cibuli a chilli, 3 min.\nRajčata a fazole, vařte 40 min bez pokličky.\nRýži dejte vařit ve 20. minutě.\n\nDruhý den je lepší.",
+     [[500,"g","mleté hovězí"],[2,"plechovka","fazole"],[2,"plechovka","krájená rajčata"],[1,"ks","cibule"],[1,"lžička","chilli vločky"],[250,"g","rýže"]]],
+    ["Losos s bramborem",4,["dinner"],
+     "Brambory do osolené vody, 20 min.\nLosos kůží dolů na rozpálenou pánev, 4 min, otočit na 1.\nFazolky přidejte k bramborám na posledních 5 min.\nPřelít máslem a citronem.\n\nVařte čerstvě — tohle se neschovává.",
+     [[500,"g","filet z lososa"],[800,"g","brambory"],[200,"g","zelené fazolky"],[50,"g","máslo"],[1,"ks","citron"]]],
+    ["Těstoviny s rajčaty a mozzarellou",4,["lunch","dinner"],
+     "Česnek na oleji, dokud nezavoní — nesmí zhnědnout.\nRajčata, 20 min povařit, pořádně dochutit.\nTěstoviny těsně pod al dente, dotáhněte je v omáčce.\nMozzarellu a bazalku až mimo oheň.",
+     [[500,"g","těstoviny"],[2,"plechovka","krájená rajčata"],[250,"g","mozzarella"],[2,"ks","stroužek česneku"],[1,"svazek","bazalka"]]],
+    ["Květákové kari",4,["lunch","dinner"],
+     "Kari pastu orestujte na oleji, 1 min.\nPřidejte cibuli a květák, dobře obalte.\nKokosové mléko a cizrnu, duste 20 min doměkka.\nPodávejte s rýží.\n\nVydrží 4 dny, dá se zamrazit.",
+     [[2,"plechovka","cizrna"],[400,"ml","kokosové mléko"],[1,"ks","květák"],[300,"g","rýže"],[2,"lžíce","kari pasta"],[1,"ks","cibule"]]],
+    ["Ovesná kaše přes noc",2,["breakfast"],
+     "Vločky, jogurt a mléko do sklenice, zamíchat, přes noc do lednice.\nRáno ovoce a med.\n\nUdělejte rovnou tři sklenice — nádobí je stejně.",
+     [[100,"g","ovesné vločky"],[200,"g","bílý jogurt"],[200,"ml","mléko"],[150,"g","borůvky"],[1,"lžíce","med"]]],
+    ["Míchaná vajíčka na toastu",2,["breakfast"],
+     "Máslo na pánev, mírný plamen, míchejte pomalu.\nToust, sůl, pepř.\n\nStáhněte, dokud jsou ještě vláčná — dojdou na talíři.",
+     [[4,"ks","vejce"],[4,"ks","toustový chléb"],[20,"g","máslo"]]],
+  ]
+};
+function loadSamples(){
+  for (const [name, servings, slots, notes, lines] of SAMPLES[S.lang]){
+    S.recipes.push({id:uid(), name, servings, maxEat:null, slots, notes,
+      ingredients: lines.map(([qty,unit,n])=>({qty, unit: UNIT_ALIAS[unit]||unit, name:n, aisle:guessAisle(n)}))});
+  }
+  save(); refresh(); go("plan");
+}
+
+/* ---------- boot ---------- */
+(async function(){
+  S = (await load()) || blankState();
+  if (diffDays(S.settings.start, today()) > S.settings.horizon) S.settings.start = today();
+  refresh();
+})();
+</script>
