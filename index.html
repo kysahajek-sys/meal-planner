@@ -176,6 +176,7 @@ button.mini:hover{text-decoration:underline}
 @media (max-width:700px){.flabel{width:100%}}
 .rec-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:12px}
 .rec{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:15px 16px}
+.rec.picked{border-color:var(--ink);box-shadow:inset 3px 0 0 var(--ink)}
 .rec h3{margin-bottom:6px}
 .rec .meta{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:8px 0 10px}
 .ing{font-size:13px;color:var(--ink-2);display:flex;gap:8px;padding:2px 0}
@@ -228,6 +229,7 @@ td input,td select{padding:6px 8px;font-size:13px}
       <button data-tab="plan" aria-selected="true"></button>
       <button data-tab="shop" aria-selected="false"></button>
       <button data-tab="recipes" aria-selected="false"></button>
+      <button data-tab="library" aria-selected="false"></button>
       <button data-tab="pantry" aria-selected="false"></button>
       <button data-tab="settings" aria-selected="false"></button>
     </nav>
@@ -238,6 +240,7 @@ td input,td select{padding:6px 8px;font-size:13px}
   <section id="tab-plan" class="tab"></section>
   <section id="tab-shop" class="tab" hidden></section>
   <section id="tab-recipes" class="tab" hidden></section>
+  <section id="tab-library" class="tab" hidden></section>
   <section id="tab-pantry" class="tab" hidden></section>
   <section id="tab-settings" class="tab" hidden></section>
 </div>
@@ -281,7 +284,7 @@ const L = {
     maxRow:n=>"max "+n+(n===1?" meal":" meals")+" per batch",
     tagged:(n,s)=>n+(n===1?" recipe":" recipes")+" tagged for "+s.toLowerCase()+".",
     tagline:"Your recipes, turned into cooking days and dated shopping runs.",
-    nav:{plan:"Plan",shop:"Shopping",recipes:"Recipes",pantry:"Pantry",settings:"Settings"},
+    nav:{plan:"Plan",shop:"Shopping",recipes:"Recipes",library:"Library",pantry:"Pantry",settings:"Settings"},
     planEyebrow:"Cooking plan", nothingYet:"Nothing to cook yet",
     emptyPlanTitle:"Add a few recipes first",
     emptyPlanBody:"The plan fills your cooking days from the recipe shelf, then works out the shopping.",
@@ -390,8 +393,36 @@ const L = {
     stockSheetSub:d=>"For the big shop on "+d+". Fill in what is in the cupboard; the rest stays on the list.",
     stockNeed:"needs", stockHave:"at home", stockSave:"Save stock", stockSaved:"Pantry updated",
     stockNone:"Nothing to check — no big shop coming up.",
+    libTitle:"Shared library", libEyebrow:"Recipes from friends",
+    libSub:"Browse a shared library and pick what you want. Nothing is sent anywhere — the app only reads.",
+    libAddr:"Library address", libLoad:"Load",
+    libPasteLbl:"or paste the library JSON here",
+    libEmpty:"No library loaded", libEmptyBody:"Paste an address and press Load, or paste the JSON straight in.",
+    libFail:"Could not load that address. The file may not exist, or the browser blocked the request — paste the JSON instead.",
+    libBad:"That does not look like a recipe library",
+    libLoaded:(n,name)=>n+(n===1?" recipe":" recipes")+(name?" · "+name:""),
+    libSearch:"Search recipes", libAdd:"Add", libHave:"Already yours",
+    libAddSel:n=>"Add selected ("+n+")",
+    libAdded:n=>n===0?"Nothing new — you have those already":n+(n===1?" recipe added":" recipes added"),
+    libNoneMatch:"Nothing matches", libNothingPicked:"Pick a recipe first",
+    libShare:"Copy share link", libShareDone:"Link copied — send it to whoever you like",
+    libPublish:"Build library.json from my recipes", libPublishTitle:"Your recipes as a library",
+    libPublishSub:"Commit this as library.json in the shared repo, or open a pull request with it.",
+    importAsk:n=>"Add “"+n+"” to your recipes?", importBtn:"Add recipe",
     keepTitle:"Keeping times", keepSub:"How long each thing lasts. This decides which shop it can go on — raise a number and it moves to the big run.",
     thKeeps:"Keeps", days:"days", keepNone:"Add recipes and the ingredients show up here.",
+    syncTitle:"Sync between devices",
+    syncSub:"Keeps your recipes, plan and pantry the same on your phone and your laptop, through a private GitHub gist. Optional — the app works without it.",
+    syncToken:"GitHub token", syncTokenHint:"A classic token with the gist scope and nothing else. It is kept in this browser only — never in the app file, never in your exports, never sent anywhere but GitHub.",
+    syncGist:"Gist ID", syncCreate:"Create a new gist", syncAuto:"Sync automatically",
+    syncNow:"Sync now", syncNever:"Not synced yet", syncAt:d=>"Last synced "+d,
+    syncPushed:"Sent to your gist", syncPulled:"Loaded from your gist", syncSame:"Already up to date",
+    syncNoToken:"Paste a token first", syncBadToken:"GitHub rejected that token",
+    syncNoGist:"That gist ID was not found", syncFail:"Could not reach GitHub",
+    syncCreated:"Gist created — paste this ID on your other device",
+    syncConflict:"Both devices changed", syncConflictSub:(a,b)=>"This device was edited "+a+". The copy in your gist was edited "+b+". Only one can win.",
+    syncKeepLocal:"Keep this device", syncKeepRemote:"Take the other one",
+    syncSecurity:"Anyone with this token can read and write your gists. Revoke it at github.com/settings/tokens if it leaks.",
     dataTitle:"Backup & transfer",
     dataSub:"Everything is stored in this browser only. Export a file to keep a copy or move to another device.",
     exportBtn:"Export JSON", importBtn:"Import JSON",
@@ -424,7 +455,7 @@ const L = {
     maxRow:n=>"max "+n+(n===1?" jídlo":n<5?" jídla":" jídel")+" z dávky",
     tagged:(n,s)=>"Pro "+s.toLowerCase()+" máte "+(n===1?"1 recept":n<5?n+" recepty":n+" receptů")+".",
     tagline:"Vaše recepty proměněné v dny vaření a naplánované nákupy.",
-    nav:{plan:"Plán",shop:"Nákupy",recipes:"Recepty",pantry:"Spíž",settings:"Nastavení"},
+    nav:{plan:"Plán",shop:"Nákupy",recipes:"Recepty",library:"Knihovna",pantry:"Spíž",settings:"Nastavení"},
     planEyebrow:"Plán vaření", nothingYet:"Zatím není co vařit",
     emptyPlanTitle:"Nejdřív přidejte pár receptů",
     emptyPlanBody:"Plán zaplní dny vaření recepty z police a pak spočítá nákupy.",
@@ -534,8 +565,36 @@ const L = {
     stockSheetSub:d=>"K velkému nákupu "+d+". Vyplňte, co je ve spíži, zbytek zůstane na seznamu.",
     stockNeed:"potřeba", stockHave:"doma", stockSave:"Uložit zásoby", stockSaved:"Spíž aktualizována",
     stockNone:"Není co procházet — žádný velký nákup se neblíží.",
+    libTitle:"Sdílená knihovna", libEyebrow:"Recepty od přátel",
+    libSub:"Procházejte sdílenou knihovnu a vyberte si, co chcete. Nikam se nic neposílá — aplikace jen čte.",
+    libAddr:"Adresa knihovny", libLoad:"Načíst",
+    libPasteLbl:"nebo sem vložte JSON knihovny",
+    libEmpty:"Žádná knihovna není načtená", libEmptyBody:"Vložte adresu a dejte Načíst, nebo vložte JSON přímo.",
+    libFail:"Adresu se nepodařilo načíst. Soubor možná neexistuje, nebo požadavek zablokoval prohlížeč — vložte JSON ručně.",
+    libBad:"Tohle nevypadá jako knihovna receptů",
+    libLoaded:(n,name)=>(n===1?"1 recept":n<5?n+" recepty":n+" receptů")+(name?" · "+name:""),
+    libSearch:"Hledat recepty", libAdd:"Přidat", libHave:"Už máte",
+    libAddSel:n=>"Přidat vybrané ("+n+")",
+    libAdded:n=>n===0?"Nic nového — tyhle už máte":n===1?"Přidán 1 recept":n<5?"Přidány "+n+" recepty":"Přidáno "+n+" receptů",
+    libNoneMatch:"Nic neodpovídá", libNothingPicked:"Nejdřív něco vyberte",
+    libShare:"Zkopírovat odkaz ke sdílení", libShareDone:"Odkaz zkopírován — pošlete ho, komu chcete",
+    libPublish:"Vytvořit library.json z mých receptů", libPublishTitle:"Vaše recepty jako knihovna",
+    libPublishSub:"Uložte to jako library.json ve sdíleném repozitáři, nebo pošlete pull request.",
+    importAsk:n=>"Přidat „"+n+"“ do vašich receptů?", importBtn:"Přidat recept",
     keepTitle:"Trvanlivost", keepSub:"Jak dlouho co vydrží. Podle toho se pozná, na který nákup se položka vejde — když číslo zvýšíte, přesune se na velký nákup.",
     thKeeps:"Vydrží", days:"dní", keepNone:"Přidejte recepty a suroviny se objeví tady.",
+    syncTitle:"Synchronizace mezi zařízeními",
+    syncSub:"Drží recepty, plán i spíž stejné na telefonu i na notebooku — přes soukromý GitHub gist. Nepovinné, aplikace funguje i bez toho.",
+    syncToken:"GitHub token", syncTokenHint:"Klasický token s oprávněním gist a ničím jiným. Zůstane jen v tomhle prohlížeči — nikdy není v souboru aplikace, v exportech ani se neposílá nikam kromě GitHubu.",
+    syncGist:"ID gistu", syncCreate:"Vytvořit nový gist", syncAuto:"Synchronizovat automaticky",
+    syncNow:"Synchronizovat teď", syncNever:"Zatím nesynchronizováno", syncAt:d=>"Naposledy "+d,
+    syncPushed:"Odesláno do gistu", syncPulled:"Načteno z gistu", syncSame:"Už je to aktuální",
+    syncNoToken:"Nejdřív vložte token", syncBadToken:"GitHub token odmítl",
+    syncNoGist:"Gist s tímhle ID se nenašel", syncFail:"GitHub není dostupný",
+    syncCreated:"Gist vytvořen — tohle ID vložte na druhém zařízení",
+    syncConflict:"Změna na obou zařízeních", syncConflictSub:(a,b)=>"Tohle zařízení jste upravili "+a+". Kopii v gistu "+b+". Vyhrát může jen jedna.",
+    syncKeepLocal:"Nechat tohle zařízení", syncKeepRemote:"Vzít tu druhou",
+    syncSecurity:"Kdokoli s tímhle tokenem může číst a zapisovat vaše gisty. Když unikne, zrušte ho na github.com/settings/tokens.",
     dataTitle:"Záloha a přenos",
     dataSub:"Všechno je uložené jen v tomhle prohlížeči. Exportem si uděláte kopii nebo data přenesete jinam.",
     exportBtn:"Exportovat JSON", importBtn:"Importovat JSON",
@@ -651,13 +710,25 @@ function blankState(){
         dinner:   {on:true,  mode:"own", cold:false, cookDays:[0,2,4,6], maxEat:4},
       },
     },
-    view:"week", pins:{}, extraShop:[], skipShop:[], checked:{},
+    view:"week", libUrl:"", pins:{}, extraShop:[], skipShop:[], checked:{},
   };
 }
+// Claude's artifact storage when it exists, the browser's own store when hosted anywhere else
+const store = {
+  async get(k){
+    if (window.storage) return window.storage.get(k);
+    const v = localStorage.getItem(k);
+    return v == null ? null : {key:k, value:v};
+  },
+  async set(k, v){
+    if (window.storage) return window.storage.set(k, v);
+    localStorage.setItem(k, v);
+    return {key:k, value:v};
+  },
+};
 async function load(){
-  if (!window.storage) return null;
   for (const k of [KEY, OLDKEY]){
-    try{ const r = await window.storage.get(k); if (r) return migrate(JSON.parse(r.value)); }
+    try{ const r = await store.get(k); if (r) return migrate(JSON.parse(r.value)); }
     catch(e){ /* not stored yet */ }
   }
   return null;
@@ -689,14 +760,119 @@ function migrate(old){
   out.lang = out.lang || b.lang;
   return out;
 }
-let saveTimer=null;
+let saveTimer=null, applyingRemote=false;
 function save(){
+  if (!applyingRemote) S.updatedAt = Date.now();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
-    try{ if (window.storage) await window.storage.set(KEY, JSON.stringify(S)); }
+    try{ await store.set(KEY, JSON.stringify(S)); }
     catch(e){ console.error("Could not save:", e); }
   }, 250);
+  if (!applyingRemote) syncSoon();
 }
+
+/* ============================================================
+   optional sync through a private gist
+   the token lives in its own key so it can never reach an export
+   ============================================================ */
+const KEY_SYNC = "prepboard:sync", GIST_FILE = "prep-board.json";
+let SY = {token:"", gist:"", auto:true, lastSync:0};
+async function loadSync(){
+  try{ const r = await store.get(KEY_SYNC); if (r) SY = {...SY, ...JSON.parse(r.value)}; }catch(e){}
+}
+async function saveSync(){ try{ await store.set(KEY_SYNC, JSON.stringify(SY)); }catch(e){} }
+
+async function gistCall(path, opts={}){
+  const res = await fetch("https://api.github.com/gists"+path, {
+    ...opts,
+    headers:{Accept:"application/vnd.github+json", Authorization:"Bearer "+SY.token,
+             "Content-Type":"application/json", ...(opts.headers||{})},
+  });
+  if (res.status===401 || res.status===403) throw new Error("auth");
+  if (res.status===404) throw new Error("missing");
+  if (!res.ok) throw new Error("http");
+  return res.json();
+}
+const syncPayload = () => JSON.stringify({app:"prep-board", version:2, updatedAt:S.updatedAt||0, data:S}, null, 2);
+
+function syncErr(e){
+  const T = t();
+  return e && e.message==="auth" ? T.syncBadToken : e && e.message==="missing" ? T.syncNoGist : T.syncFail;
+}
+async function syncCreate(){
+  const T = t();
+  if (!SY.token) return toast(T.syncNoToken);
+  try{
+    const g = await gistCall("", {method:"POST", body:JSON.stringify({
+      description:"Prep Board", public:false, files:{[GIST_FILE]:{content:syncPayload()}}})});
+    SY.gist = g.id; SY.lastSync = Date.now(); await saveSync();
+    renderSettings(); toast(T.syncCreated);
+  }catch(e){ toast(syncErr(e)); }
+}
+async function syncPush(quiet){
+  const T = t();
+  if (!SY.token || !SY.gist) return quiet ? null : toast(T.syncNoToken);
+  try{
+    await gistCall("/"+SY.gist, {method:"PATCH", body:JSON.stringify({files:{[GIST_FILE]:{content:syncPayload()}}})});
+    SY.lastSync = Date.now(); await saveSync();
+    if (!quiet){ renderSettings(); toast(T.syncPushed); }
+  }catch(e){ if (!quiet) toast(syncErr(e)); }
+}
+async function syncPull(quiet){
+  const T = t();
+  if (!SY.token || !SY.gist) return quiet ? null : toast(T.syncNoToken);
+  let remote;
+  try{
+    const g = await gistCall("/"+SY.gist);
+    const file = g.files && g.files[GIST_FILE];
+    if (!file) throw new Error("missing");
+    remote = JSON.parse(file.content);
+  }catch(e){ if (!quiet) toast(syncErr(e)); return; }
+
+  const there = remote.updatedAt || 0, here = S.updatedAt || 0;
+  if (there <= here){                       // nothing newer waiting for us
+    if (!quiet && there < here) syncPush();
+    else if (!quiet) toast(T.syncSame);
+    return;
+  }
+  const localChangedSinceSync = here > (SY.lastSync || 0);
+  if (localChangedSinceSync) return syncConflictSheet(remote);
+  applyRemote(remote);
+  if (!quiet) toast(T.syncPulled);
+}
+function applyRemote(remote){
+  const data = remote && remote.data ? remote.data : remote;
+  if (!data || !Array.isArray(data.recipes)) return;
+  applyingRemote = true;
+  S = migrate(data);
+  S.updatedAt = remote.updatedAt || Date.now();
+  SY.lastSync = Date.now(); saveSync();
+  save();
+  applyingRemote = false;
+  refresh();
+}
+function syncConflictSheet(remote){
+  const T = t();
+  const when = ms => new Date(ms).toLocaleString(S.lang==="cs"?"cs":"en");
+  document.getElementById("modal").innerHTML = `
+    <div class="scrim">
+      <div class="sheet" role="dialog" aria-modal="true">
+        <p class="eyebrow">${T.syncTitle}</p>
+        <h2>${T.syncConflict}</h2>
+        <p class="sub" style="margin:8px 0 16px">${T.syncConflictSub(when(S.updatedAt||0), when(remote.updatedAt||0))}</p>
+        <div class="row">
+          <button class="btn" onclick='closeMeal();applyRemote(${JSON.stringify(JSON.stringify(remote))})'>${T.syncKeepRemote}</button>
+          <button class="btn ghost" onclick="closeMeal();syncPush()">${T.syncKeepLocal}</button>
+        </div>
+      </div></div>`;
+}
+let syncTimer = null;
+function syncSoon(){
+  if (!SY.auto || !SY.token || !SY.gist) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(()=>syncPush(true), 4000);
+}
+function setSync(k, v){ SY[k] = typeof v==="string" ? v.trim() : v; saveSync(); renderSettings(); }
 
 /* ============================================================
    the planner
@@ -968,7 +1144,7 @@ function buildTrips(sessions){
 let PLAN=null;
 function refresh(){
   PLAN = buildPlan();
-  renderChrome(); renderPlan(); renderShop(); renderRecipes(); renderPantry(); renderSettings();
+  renderChrome(); renderPlan(); renderShop(); renderRecipes(); renderLibrary(); renderPantry(); renderSettings();
 }
 function renderChrome(){
   document.documentElement.lang = S.lang;
@@ -1339,6 +1515,7 @@ function renderRecipes(){
       <div class="rec-actions">
         <button class="btn ghost small" onclick="edit('${r.id}')">${T.edit}</button>
         <button class="btn danger small" onclick="del('${r.id}')">${T.del}</button>
+        <button class="btn ghost small" onclick="shareRecipe('${r.id}')">${T.libShare}</button>
       </div></div>`;
 
   // filter bar: one row for the dish base, one for meat and diet
@@ -1506,6 +1683,253 @@ function saveRecipe(){
   editing=null; save(); refresh(); toast(T.saved);
 }
 
+/* ============================================================
+   shared library — read-only, anything fetched is untrusted
+   ============================================================ */
+let LIB = null, LF = {cat:"", prot:"", q:""}, libSel = new Set();
+
+const clip = (v,n) => typeof v==="string" ? v.trim().slice(0,n) : "";
+const num  = (v,lo,hi,dflt) => { const n = parseFloat(v); return isFinite(n) && n>=lo && n<=hi ? n : dflt; };
+
+// a recipe from outside is data, never settings — everything is checked and clamped
+function sanitizeRecipe(raw){
+  if (!raw || typeof raw !== "object") return null;
+  const name = clip(raw.name, 120);
+  if (!name) return null;
+  const ings = Array.isArray(raw.ingredients) ? raw.ingredients.slice(0,60) : [];
+  const ingredients = ings.map(i=>{
+    if (!i || typeof i !== "object") return null;
+    const n = clip(i.name, 80);
+    if (!n) return null;
+    return {
+      qty: num(i.qty, 0, 100000, 1),
+      unit: UNITS.includes(i.unit) ? i.unit : (UNIT_ALIAS[String(i.unit).toLowerCase()] || "pcs"),
+      name: n,
+      aisle: AISLES.includes(i.aisle) ? i.aisle : guessAisle(n),
+    };
+  }).filter(Boolean);
+  if (!ingredients.length) return null;
+  const slots = Array.isArray(raw.slots) ? raw.slots.filter(x=>SLOTS.includes(x)) : [];
+  return {
+    id: uid(),
+    name,
+    servings: Math.round(num(raw.servings, 1, 99, 4)),
+    category: clip(raw.category, 40),
+    protein: clip(raw.protein, 40),
+    diet: raw.diet==="vegan" ? "vegan" : raw.diet==="vegetarian" ? "vegetarian" : "",
+    slots: slots.length ? slots : ["lunch","dinner"],
+    cold: !!raw.cold,
+    maxEat: raw.maxEat ? Math.round(num(raw.maxEat, 1, 14, 1)) : null,
+    notes: clip(raw.notes, 4000),
+    author: clip(raw.author, 60),
+    lang: clip(raw.lang, 5),
+    ingredients,
+  };
+}
+function readLibrary(text){
+  let parsed;
+  try{ parsed = JSON.parse(text); }catch(e){ return null; }
+  const list = Array.isArray(parsed) ? parsed
+             : Array.isArray(parsed.recipes) ? parsed.recipes
+             : (parsed.data && Array.isArray(parsed.data.recipes)) ? parsed.data.recipes
+             : null;
+  if (!list) return null;
+  const recipes = list.slice(0,500).map(sanitizeRecipe).filter(Boolean);
+  if (!recipes.length) return null;
+  return {name: clip(parsed.name, 60), recipes};
+}
+async function loadLibrary(){
+  const T = t();
+  const url = (document.getElementById("liburl")||{}).value || "";
+  S.libUrl = url.trim(); save();
+  if (!S.libUrl) return toast(T.libBad);
+  try{
+    const res = await fetch(S.libUrl, {headers:{Accept:"application/json"}});
+    if (!res.ok) throw new Error(res.status);
+    const lib = readLibrary(await res.text());
+    if (!lib) return toast(T.libBad);
+    LIB = lib; libSel = new Set(); renderLibrary();
+  }catch(e){ toast(T.libFail); }
+}
+function pasteLibrary(){
+  const T = t();
+  const box = document.getElementById("libjson");
+  const lib = readLibrary((box ? box.value : "").trim());
+  if (!lib) return toast(T.libBad);
+  LIB = lib; libSel = new Set(); renderLibrary();
+}
+const mine = () => new Set(S.recipes.map(r=>r.name.trim().toLowerCase()));
+function libMatches(r){
+  const q = LF.q.trim().toLowerCase();
+  if (q && !(r.name+" "+r.category+" "+r.protein+" "+r.ingredients.map(i=>i.name).join(" ")).toLowerCase().includes(q)) return false;
+  if (LF.cat && (r.category||"") !== LF.cat) return false;
+  if (LF.prot === "__veg"){ if (!r.diet) return false; }
+  else if (LF.prot === "__vegan"){ if (r.diet !== "vegan") return false; }
+  else if (LF.prot && (r.protein||"") !== LF.prot) return false;
+  return true;
+}
+function setLibFilter(kind,val){ LF[kind] = (LF[kind]===val) ? "" : val; renderLibrary(); }
+function setLibQuery(v){ LF.q = v; renderLibrary(); }
+function toggleLibPick(id){ libSel.has(id) ? libSel.delete(id) : libSel.add(id); renderLibrary(); }
+
+function addFromLibrary(ids){
+  const T = t();
+  if (!ids.length) return toast(T.libNothingPicked);
+  const have = mine();
+  let n = 0;
+  for (const id of ids){
+    const r = LIB.recipes.find(x=>x.id===id);
+    if (!r || have.has(r.name.trim().toLowerCase())) continue;
+    S.recipes.push({...r, id: uid()});
+    have.add(r.name.trim().toLowerCase());
+    n++;
+  }
+  libSel = new Set();
+  save(); refresh(); toast(T.libAdded(n));
+}
+
+/* ---------- share one recipe as a link ---------- */
+const b64  = str => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64 = str => new TextDecoder().decode(Uint8Array.from(atob(str.replace(/-/g,"+").replace(/_/g,"/")), c=>c.charCodeAt(0)));
+function shareRecipe(id){
+  const T = t();
+  const r = S.recipes.find(x=>x.id===id) || (LIB && LIB.recipes.find(x=>x.id===id));
+  if (!r) return;
+  const {id:_drop, ...rest} = r;
+  const link = location.origin + location.pathname + "#r=" + b64(JSON.stringify(rest));
+  navigator.clipboard.writeText(link).then(()=>toast(T.libShareDone), ()=>toast(T.copyBlocked));
+}
+function checkSharedLink(){
+  const m = (location.hash||"").match(/^#r=(.+)$/);
+  if (!m) return;
+  let r = null;
+  try{ r = sanitizeRecipe(JSON.parse(unb64(m[1]))); }catch(e){ r = null; }
+  history.replaceState(null, "", location.pathname + location.search);
+  if (!r) return;
+  const T = t();
+  document.getElementById("modal").innerHTML = `
+    <div class="scrim" onclick="if(event.target===this)closeMeal()">
+      <div class="sheet" role="dialog" aria-modal="true">
+        <button class="x" onclick="closeMeal()" aria-label="×">×</button>
+        <p class="eyebrow">${T.libEyebrow}</p>
+        <h2>${esc(r.name)}</h2>
+        <p class="sub" style="margin:6px 0 12px">${T.importAsk(esc(r.name))}</p>
+        ${r.ingredients.map(i=>`<div class="ing"><span class="q">${fmtNum(i.qty)} ${ulabel(i.unit,i.qty)}</span><span>${esc(i.name)}</span></div>`).join("")}
+        <div class="row" style="margin-top:18px">
+          <button class="btn" onclick='acceptShared(${JSON.stringify(JSON.stringify(r))})'>${T.importBtn}</button>
+          <button class="btn ghost" onclick="closeMeal()">${T.cancel}</button>
+        </div>
+      </div></div>`;
+}
+function acceptShared(json){
+  const r = sanitizeRecipe(JSON.parse(json));
+  if (!r) return;
+  if (mine().has(r.name.trim().toLowerCase())) { closeMeal(); return toast(t().libAdded(0)); }
+  S.recipes.push({...r, id: uid()});
+  closeMeal(); save(); refresh(); go("recipes"); toast(t().libAdded(1));
+}
+
+/* ---------- publish your own shelf ---------- */
+function publishSheet(){
+  const T = t();
+  const payload = JSON.stringify({
+    format:"prep-board-library", version:1, name:"",
+    recipes: S.recipes.map(({id, ...r})=>r),
+  }, null, 2);
+  document.getElementById("modal").innerHTML = `
+    <div class="scrim" onclick="if(event.target===this)closeMeal()">
+      <div class="sheet" role="dialog" aria-modal="true">
+        <button class="x" onclick="closeMeal()" aria-label="×">×</button>
+        <p class="eyebrow">${T.libTitle}</p>
+        <h2>${T.libPublishTitle}</h2>
+        <p class="sub" style="margin:6px 0 12px">${T.libPublishSub}</p>
+        <textarea id="pub" class="mono" rows="10" readonly onclick="this.select()">${esc(payload)}</textarea>
+        <div class="row" style="margin-top:14px">
+          <button class="btn" onclick="downloadText('library.json', document.getElementById('pub').value)">${T.download}</button>
+          <button class="btn ghost" onclick="copyText(document.getElementById('pub').value)">${T.copyJson}</button>
+        </div>
+      </div></div>`;
+}
+function downloadText(filename, text){
+  try{
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], {type:"application/json"}));
+    a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  }catch(e){ toast(t().downloadBlocked); }
+}
+function copyText(text){ navigator.clipboard.writeText(text).then(()=>toast(t().copied), ()=>toast(t().copyBlocked)); }
+
+function renderLibrary(){
+  const el = document.getElementById("tab-library"), T = t();
+  const source = `
+    <div class="card" style="margin-bottom:16px">
+      <div class="field" style="margin-bottom:10px">
+        <label for="liburl">${T.libAddr}</label>
+        <div class="row"><input id="liburl" type="text" style="flex:1;min-width:220px" value="${esc(S.libUrl||"")}"
+          placeholder="https://raw.githubusercontent.com/user/prep-board-recipes/main/library.json">
+          <button class="btn" onclick="loadLibrary()">${T.libLoad}</button></div>
+      </div>
+      <details><summary>${T.libPasteLbl}</summary>
+        <textarea id="libjson" class="mono" rows="5" style="margin-top:8px"></textarea>
+        <button class="btn ghost small" style="margin-top:8px" onclick="pasteLibrary()">${T.libLoad}</button>
+      </details>
+    </div>`;
+
+  if (!LIB){
+    el.innerHTML = `
+      <div class="spread"><div><p class="eyebrow">${T.libEyebrow}</p><h2>${T.libTitle}</h2>
+        <p class="sub" style="margin:4px 0 0">${T.libSub}</p></div>
+        <button class="btn ghost small" onclick="publishSheet()">${T.libPublish}</button></div>
+      ${source}
+      <div class="empty"><strong>${T.libEmpty}</strong>${T.libEmptyBody}</div>`;
+    return;
+  }
+
+  const have = mine();
+  const cats  = [...new Set(LIB.recipes.map(r=>(r.category||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const meats = [...new Set(LIB.recipes.map(r=>(r.protein||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const chip = (label, kind, val) =>
+    `<button class="fchip" aria-pressed="${LF[kind]===val}" onclick="setLibFilter('${kind}','${esc(val).replace(/'/g,"\\'")}')">${esc(label)}</button>`;
+  const shown = LIB.recipes.filter(libMatches);
+
+  const cards = shown.map(r=>{
+    const already = have.has(r.name.trim().toLowerCase());
+    const picked = libSel.has(r.id);
+    return `<div class="rec ${picked?"picked":""}">
+      <h3>${esc(r.name)}</h3>
+      ${(r.slots||[]).map(x=>`<span class="pill">${T.slot[x]}</span>`).join("")}
+      ${r.category?`<span class="pill">${esc(r.category)}</span>`:""}
+      ${r.diet?`<span class="pill veg">${r.diet==="vegan"?T.vegan:T.vegetarian}</span>`:""}
+      ${r.protein?`<span class="pill meat">${esc(r.protein)}</span>`:""}
+      <div class="meta">${T.perBatch(r.servings)}${r.author?" · "+esc(r.author):""}</div>
+      ${r.ingredients.slice(0,6).map(i=>`<div class="ing"><span class="q">${fmtNum(i.qty)} ${ulabel(i.unit,i.qty)}</span><span>${esc(i.name)}</span></div>`).join("")}
+      ${r.ingredients.length>6?`<div class="hint">+${r.ingredients.length-6}</div>`:""}
+      ${r.notes?`<details><summary>${T.method}</summary><div class="method" style="margin-top:8px">${esc(r.notes)}</div></details>`:""}
+      <div class="rec-actions">
+        ${already ? `<span class="pill">${T.libHave}</span>`
+                  : `<button class="btn ghost small" onclick="addFromLibrary(['${r.id}'])">${T.libAdd}</button>
+                     <label class="check"><input type="checkbox" ${picked?"checked":""} onchange="toggleLibPick('${r.id}')"></label>`}
+      </div></div>`;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="spread"><div><p class="eyebrow">${T.libLoaded(LIB.recipes.length, LIB.name)}</p><h2>${T.libTitle}</h2></div>
+      <div class="row">
+        <button class="btn ghost small" onclick="publishSheet()">${T.libPublish}</button>
+        <button class="btn small" onclick="addFromLibrary([...libSel])" ${libSel.size?"":"disabled"}>${T.libAddSel(libSel.size)}</button>
+      </div></div>
+    ${source}
+    <div class="field" style="max-width:340px"><label for="libq">${T.libSearch}</label>
+      <input id="libq" type="text" value="${esc(LF.q)}" oninput="setLibQuery(this.value)"></div>
+    <div class="filters">
+      <div class="frow"><span class="flabel">${T.filterCat}</span>${chip(T.filterAll,"cat","")}${cats.map(c=>chip(c,"cat",c)).join("")}</div>
+      <div class="frow"><span class="flabel">${T.filterProt}</span>${chip(T.filterAll,"prot","")}${meats.map(m=>chip(m,"prot",m)).join("")}${chip(T.filterVeg,"prot","__veg")}${chip(T.filterVegan,"prot","__vegan")}</div>
+    </div>
+    ${shown.length ? `<div class="rec-list">${cards}</div>` : `<div class="empty"><strong>${T.libNoneMatch}</strong></div>`}`;
+}
+
 /* ---------- pantry ---------- */
 function renderPantry(){
   const el = document.getElementById("tab-pantry"), T = t();
@@ -1646,6 +2070,25 @@ function renderSettings(){
       <h3>${T.smallTitle}</h3>
       <label class="check"><input type="checkbox" ${st.smallOn?"checked":""} onchange="setNum('smallOn',this.checked)">${T.smallToggle}</label>
       <p class="hint">${st.smallOn?T.smallHint:T.noSmallHint}</p>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>${T.syncTitle}</h3>
+      <p class="hint" style="margin-top:0">${T.syncSub}</p>
+      <div class="grid2" style="margin-top:12px">
+        <div class="field"><label for="sytok">${T.syncToken}</label>
+          <input id="sytok" type="password" autocomplete="off" value="${esc(SY.token)}"
+                 placeholder="ghp_…" onchange="setSync('token',this.value)">
+          <div class="hint">${T.syncTokenHint}</div></div>
+        <div class="field"><label for="sygist">${T.syncGist}</label>
+          <input id="sygist" type="text" value="${esc(SY.gist)}" placeholder="a1b2c3…" onchange="setSync('gist',this.value)">
+          <div class="row" style="margin-top:6px"><button class="btn ghost small" onclick="syncCreate()">${T.syncCreate}</button></div></div>
+      </div>
+      <label class="check" style="margin-top:4px"><input type="checkbox" ${SY.auto?"checked":""} onchange="setSync('auto',this.checked)">${T.syncAuto}</label>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" onclick="syncPull()">${T.syncNow}</button>
+        <span class="hint" style="margin:0">${SY.lastSync ? T.syncAt(new Date(SY.lastSync).toLocaleString(S.lang==="cs"?"cs":"en")) : T.syncNever}</span>
+      </div>
+      <p class="hint">${T.syncSecurity}</p>
     </div>
     <div class="card" style="margin-top:14px">
       <h3>${T.dataTitle}</h3>
@@ -1907,6 +2350,9 @@ function loadSamples(){
 (async function(){
   S = (await load()) || blankState();
   if (diffDays(S.settings.start, today()) > S.settings.horizon) S.settings.start = today();
+  await loadSync();
   refresh();
+  checkSharedLink();
+  if (SY.auto && SY.token && SY.gist) syncPull(true);
 })();
 </script>
