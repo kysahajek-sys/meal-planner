@@ -1,6 +1,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prep Board — cook plan &amp; shopping runs</title>
+<title>Foodify — cook plan &amp; shopping runs</title>
+<meta name="description" content="Turn your recipes into cooking days and dated shopping runs.">
+<meta name="theme-color" content="#0f201c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Foodify">
+<meta name="application-name" content="Foodify">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -217,7 +228,7 @@ td input,td select{padding:6px 8px;font-size:13px}
   <div class="head-in">
     <div class="top">
       <div class="brand">
-        <h1>Prep&nbsp;Board</h1>
+        <h1>Foodify</h1>
         <p id="tagline"></p>
       </div>
       <div class="langs" id="langs">
@@ -229,7 +240,6 @@ td input,td select{padding:6px 8px;font-size:13px}
       <button data-tab="plan" aria-selected="true"></button>
       <button data-tab="shop" aria-selected="false"></button>
       <button data-tab="recipes" aria-selected="false"></button>
-      <button data-tab="library" aria-selected="false"></button>
       <button data-tab="pantry" aria-selected="false"></button>
       <button data-tab="settings" aria-selected="false"></button>
     </nav>
@@ -240,7 +250,6 @@ td input,td select{padding:6px 8px;font-size:13px}
   <section id="tab-plan" class="tab"></section>
   <section id="tab-shop" class="tab" hidden></section>
   <section id="tab-recipes" class="tab" hidden></section>
-  <section id="tab-library" class="tab" hidden></section>
   <section id="tab-pantry" class="tab" hidden></section>
   <section id="tab-settings" class="tab" hidden></section>
 </div>
@@ -248,7 +257,7 @@ td input,td select{padding:6px 8px;font-size:13px}
 
 <script>
 /* ============================================================
-   Prep Board — meal plan + shopping run generator (EN / CS)
+   Foodify — meal plan + shopping run generator (EN / CS)
    ============================================================ */
 const SLOTS = ["breakfast","lunch","dinner"];
 const AISLES = ["Produce","Meat & fish","Dairy & eggs","Bakery","Frozen","Pantry","Other"];
@@ -275,8 +284,6 @@ const L = {
     aisle:{"Produce":"Produce","Meat & fish":"Meat & fish","Dairy & eggs":"Dairy & eggs","Bakery":"Bakery","Frozen":"Frozen","Pantry":"Pantry","Other":"Other"},
     unit:{g:"g",kg:"kg",ml:"ml",l:"l",pcs:"pcs",tbsp:"tbsp",tsp:"tsp",bunch:"bunch",can:"can",pack:"pack"},
     people:n=>n+(n===1?" person":" people"),
-    portions:n=>n+" portions",
-    meals:n=>n+(n===1?" meal":" meals"),
     recipes:n=>n+(n===1?" recipe":" recipes"),
     runs:n=>n+(n===1?" run ahead":" runs ahead"),
     items:n=>n+" items",
@@ -284,7 +291,7 @@ const L = {
     maxRow:n=>"max "+n+(n===1?" meal":" meals")+" per batch",
     tagged:(n,s)=>n+(n===1?" recipe":" recipes")+" tagged for "+s.toLowerCase()+".",
     tagline:"Your recipes, turned into cooking days and dated shopping runs.",
-    nav:{plan:"Plan",shop:"Shopping",recipes:"Recipes",library:"Library",pantry:"Pantry",settings:"Settings"},
+    nav:{plan:"Plan",shop:"Shopping",recipes:"Recipes",pantry:"Pantry",settings:"Settings"},
     planEyebrow:"Cooking plan", nothingYet:"Nothing to cook yet",
     emptyPlanTitle:"Add a few recipes first",
     emptyPlanBody:"The plan fills your cooking days from the recipe shelf, then works out the shopping.",
@@ -307,7 +314,7 @@ const L = {
     copy:"Copy as text", clearTicks:"Clear ticks",
     noRuns:"No runs yet", nothingBuy:"Nothing to buy",
     nothingBuyBody:"Add recipes and cooking days, and the runs appear here.",
-    run:n=>"Run "+n, covers:s=>"covers cooking on "+s,
+    covers:s=>"covers cooking on "+s,
     stale:"· buy this one closer to the day",
     copied:"Shopping list copied", copyBlocked:"Copy blocked — select the text instead",
     shelf:"Recipe shelf", edit:"Edit", del:"Delete",
@@ -355,7 +362,6 @@ const L = {
     maxRowHintCold:"One hot dinner plus the lunches after it. Cook, dinner, lunch, cold dinner, lunch = 3.",
     coldLabel:"No cooking — cold dinner", coldLabelHint:"Kept for cold dinner days only.",
     coldPill:"Cold", assembleOn:d=>"Cold dinner · "+d,
-    whenShop:"When you shop",
     shopHint:"The app fills the runs: each ingredient goes on the last run before the day you cook it, and flags anything that won't keep that long. It adds a run by itself if nothing comes before your first cooking day.",
     oneOff:"Add a one-off big shop", add:"Add", pickDate:"Pick a date first",
     whenBig:"Big shopping", bigHint:"The main run. Everything that keeps long enough is pushed onto these.",
@@ -371,7 +377,6 @@ const L = {
     categoryHint:"Used to keep similar dishes apart in the plan.",
     catRepeat:"Days before the same category returns",
     catRepeatHint:"Stops pasta following pasta. Set 0 to ignore categories.",
-    catRepeatHint2:"",
     uncategorised:"No category",
     reroll:"Give me another", noAlternative:"No other recipe fits this meal",
     catRepeatHard:"A category is not allowed back until this many days have passed. It gives way only if nothing else can fill the meal.",
@@ -393,21 +398,9 @@ const L = {
     stockSheetSub:d=>"For the big shop on "+d+". Fill in what is in the cupboard; the rest stays on the list.",
     stockNeed:"needs", stockHave:"at home", stockSave:"Save stock", stockSaved:"Pantry updated",
     stockNone:"Nothing to check — no big shop coming up.",
-    libTitle:"Shared library", libEyebrow:"Recipes from friends",
-    libSub:"Browse a shared library and pick what you want. Nothing is sent anywhere — the app only reads.",
-    libAddr:"Library address", libLoad:"Load",
-    libPasteLbl:"or paste the library JSON here",
-    libEmpty:"No library loaded", libEmptyBody:"Paste an address and press Load, or paste the JSON straight in.",
-    libFail:"Could not load that address. The file may not exist, or the browser blocked the request — paste the JSON instead.",
-    libBad:"That does not look like a recipe library",
-    libLoaded:(n,name)=>n+(n===1?" recipe":" recipes")+(name?" · "+name:""),
-    libSearch:"Search recipes", libAdd:"Add", libHave:"Already yours",
-    libAddSel:n=>"Add selected ("+n+")",
+    libEyebrow:"Recipes from friends",
     libAdded:n=>n===0?"Nothing new — you have those already":n+(n===1?" recipe added":" recipes added"),
-    libNoneMatch:"Nothing matches", libNothingPicked:"Pick a recipe first",
     libShare:"Copy share link", libShareDone:"Link copied — send it to whoever you like",
-    libPublish:"Build library.json from my recipes", libPublishTitle:"Your recipes as a library",
-    libPublishSub:"Commit this as library.json in the shared repo, or open a pull request with it.",
     importAsk:n=>"Add “"+n+"” to your recipes?", importBtn:"Add recipe",
     keepTitle:"Keeping times", keepSub:"How long each thing lasts. This decides which shop it can go on — raise a number and it moves to the big run.",
     thKeeps:"Keeps", days:"days", keepNone:"Add recipes and the ingredients show up here.",
@@ -430,7 +423,7 @@ const L = {
     exportCount:(r,p)=>r+(r===1?" recipe":" recipes")+" · "+p+(p===1?" pantry item":" pantry items")+" · settings",
     importTitle:"Import", chooseFile:"Choose a .json file", orPaste:"or paste the JSON here",
     mode:"What to do with it", modeReplace:"Replace everything", modeMerge:"Add the recipes to mine",
-    doImport:"Import", importBad:"That doesn't look like a Prep Board export",
+    doImport:"Import", importBad:"That doesn't look like a Foodify export",
     importEmpty:"Pick a file or paste the JSON first",
     importReplaced:"Everything replaced", importAdded:n=>n===0?"No new recipes — they were all there already":n+(n===1?" recipe added":" recipes added"),
     downloadBlocked:"Download blocked here — copy the text instead",
@@ -446,8 +439,6 @@ const L = {
       tbsp:["lžíce","lžíce","lžic"], tsp:["lžička","lžičky","lžiček"],
       bunch:["svazek","svazky","svazků"], can:["plechovka","plechovky","plechovek"], pack:"balení"},
     people:n=>n+(n===1?" osoba":n<5?" osoby":" osob"),
-    portions:n=>n+(n===1?" porce":n<5?" porce":" porcí"),
-    meals:n=>n+(n===1?" jídlo":n<5?" jídla":" jídel"),
     recipes:n=>n+(n===1?" recept":n<5?" recepty":" receptů"),
     runs:n=>n+(n===1?" nákup před vámi":n<5?" nákupy před vámi":" nákupů před vámi"),
     items:n=>n+(n===1?" položka":n<5?" položky":" položek"),
@@ -455,7 +446,7 @@ const L = {
     maxRow:n=>"max "+n+(n===1?" jídlo":n<5?" jídla":" jídel")+" z dávky",
     tagged:(n,s)=>"Pro "+s.toLowerCase()+" máte "+(n===1?"1 recept":n<5?n+" recepty":n+" receptů")+".",
     tagline:"Vaše recepty proměněné v dny vaření a naplánované nákupy.",
-    nav:{plan:"Plán",shop:"Nákupy",recipes:"Recepty",library:"Knihovna",pantry:"Spíž",settings:"Nastavení"},
+    nav:{plan:"Plán",shop:"Nákupy",recipes:"Recepty",pantry:"Spíž",settings:"Nastavení"},
     planEyebrow:"Plán vaření", nothingYet:"Zatím není co vařit",
     emptyPlanTitle:"Nejdřív přidejte pár receptů",
     emptyPlanBody:"Plán zaplní dny vaření recepty z police a pak spočítá nákupy.",
@@ -479,7 +470,7 @@ const L = {
     copy:"Zkopírovat jako text", clearTicks:"Zrušit odškrtnutí",
     noRuns:"Zatím žádné nákupy", nothingBuy:"Není co kupovat",
     nothingBuyBody:"Přidejte recepty a dny vaření a nákupy se objeví tady.",
-    run:n=>"Nákup "+n, covers:s=>"pokrývá vaření "+s,
+    covers:s=>"pokrývá vaření "+s,
     stale:"· tohle kupte až blíž k datu",
     copied:"Nákupní seznam zkopírován", copyBlocked:"Kopírování zablokováno — označte text ručně",
     shelf:"Police s recepty", edit:"Upravit", del:"Smazat",
@@ -527,7 +518,6 @@ const L = {
     maxRowHintCold:"Jedna teplá večeře plus obědy po ní. Vaření, večeře, oběd, studená večeře, oběd = 3.",
     coldLabel:"Bez vaření — studená večeře", coldLabelHint:"Použije se jen ve dnech se studenou večeří.",
     coldPill:"Studené", assembleOn:d=>"Studená večeře · "+d,
-    whenShop:"Kdy nakupujete",
     shopHint:"Nákupy naplní aplikace sama: každá surovina jde na poslední nákup před dnem vaření a co do té doby nevydrží, to označí. Když před prvním vařením žádný nákup není, jeden si přidá.",
     oneOff:"Přidat jednorázový velký nákup", add:"Přidat", pickDate:"Nejdřív vyberte datum",
     whenBig:"Velký nákup", bigHint:"Hlavní nákup. Všechno, co dost vydrží, se nacpe sem.",
@@ -543,7 +533,6 @@ const L = {
     categoryHint:"Slouží k tomu, aby podobná jídla nešla hned po sobě.",
     catRepeat:"Za kolik dní se může vrátit stejná kategorie",
     catRepeatHint:"Zabrání tomu, aby po těstovinách byly zase těstoviny. 0 = kategorie ignorovat.",
-    catRepeatHint2:"",
     uncategorised:"Bez kategorie",
     reroll:"Dej jiné", noAlternative:"Pro tohle jídlo není jiný recept",
     catRepeatHard:"Kategorie se nesmí vrátit dřív než po tomhle počtu dní. Ustoupí, jen když by jídlo nemělo čím zaplnit.",
@@ -565,21 +554,9 @@ const L = {
     stockSheetSub:d=>"K velkému nákupu "+d+". Vyplňte, co je ve spíži, zbytek zůstane na seznamu.",
     stockNeed:"potřeba", stockHave:"doma", stockSave:"Uložit zásoby", stockSaved:"Spíž aktualizována",
     stockNone:"Není co procházet — žádný velký nákup se neblíží.",
-    libTitle:"Sdílená knihovna", libEyebrow:"Recepty od přátel",
-    libSub:"Procházejte sdílenou knihovnu a vyberte si, co chcete. Nikam se nic neposílá — aplikace jen čte.",
-    libAddr:"Adresa knihovny", libLoad:"Načíst",
-    libPasteLbl:"nebo sem vložte JSON knihovny",
-    libEmpty:"Žádná knihovna není načtená", libEmptyBody:"Vložte adresu a dejte Načíst, nebo vložte JSON přímo.",
-    libFail:"Adresu se nepodařilo načíst. Soubor možná neexistuje, nebo požadavek zablokoval prohlížeč — vložte JSON ručně.",
-    libBad:"Tohle nevypadá jako knihovna receptů",
-    libLoaded:(n,name)=>(n===1?"1 recept":n<5?n+" recepty":n+" receptů")+(name?" · "+name:""),
-    libSearch:"Hledat recepty", libAdd:"Přidat", libHave:"Už máte",
-    libAddSel:n=>"Přidat vybrané ("+n+")",
+    libEyebrow:"Recepty od přátel",
     libAdded:n=>n===0?"Nic nového — tyhle už máte":n===1?"Přidán 1 recept":n<5?"Přidány "+n+" recepty":"Přidáno "+n+" receptů",
-    libNoneMatch:"Nic neodpovídá", libNothingPicked:"Nejdřív něco vyberte",
     libShare:"Zkopírovat odkaz ke sdílení", libShareDone:"Odkaz zkopírován — pošlete ho, komu chcete",
-    libPublish:"Vytvořit library.json z mých receptů", libPublishTitle:"Vaše recepty jako knihovna",
-    libPublishSub:"Uložte to jako library.json ve sdíleném repozitáři, nebo pošlete pull request.",
     importAsk:n=>"Přidat „"+n+"“ do vašich receptů?", importBtn:"Přidat recept",
     keepTitle:"Trvanlivost", keepSub:"Jak dlouho co vydrží. Podle toho se pozná, na který nákup se položka vejde — když číslo zvýšíte, přesune se na velký nákup.",
     thKeeps:"Vydrží", days:"dní", keepNone:"Přidejte recepty a suroviny se objeví tady.",
@@ -602,7 +579,7 @@ const L = {
     exportCount:(r,p)=>(r===1?"1 recept":r<5?r+" recepty":r+" receptů")+" · "+(p===1?"1 položka ve spíži":p<5?p+" položky ve spíži":p+" položek ve spíži")+" · nastavení",
     importTitle:"Import", chooseFile:"Vyberte soubor .json", orPaste:"nebo sem vložte JSON",
     mode:"Co s tím", modeReplace:"Nahradit všechno", modeMerge:"Jen přidat recepty k mým",
-    doImport:"Importovat", importBad:"Tohle nevypadá jako export z Prep Board",
+    doImport:"Importovat", importBad:"Tohle nevypadá jako export z Foodify",
     importEmpty:"Nejdřív vyberte soubor nebo vložte JSON",
     importReplaced:"Všechno nahrazeno",
     importAdded:n=>n===0?"Žádný nový recept — všechny už tam byly":(n===1?"Přidán 1 recept":n<5?"Přidány "+n+" recepty":"Přidáno "+n+" receptů"),
@@ -694,7 +671,7 @@ const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;"
 /* ============================================================
    state
    ============================================================ */
-const KEY = "prepboard:v2", OLDKEY = "prepboard:v1";
+const KEY = "foodify:v1", OLDKEYS = ["prepboard:v2", "prepboard:v1"];   // old keys still read, so nothing is lost
 let S = null;
 
 function blankState(){
@@ -710,7 +687,7 @@ function blankState(){
         dinner:   {on:true,  mode:"own", cold:false, cookDays:[0,2,4,6], maxEat:4},
       },
     },
-    view:"week", libUrl:"", pins:{}, extraShop:[], skipShop:[], checked:{},
+    view:"week", pins:{}, extraShop:[], skipShop:[], checked:{},
   };
 }
 // Claude's artifact storage when it exists, the browser's own store when hosted anywhere else
@@ -727,7 +704,7 @@ const store = {
   },
 };
 async function load(){
-  for (const k of [KEY, OLDKEY]){
+  for (const k of [KEY, ...OLDKEYS]){
     try{ const r = await store.get(k); if (r) return migrate(JSON.parse(r.value)); }
     catch(e){ /* not stored yet */ }
   }
@@ -753,6 +730,8 @@ function migrate(old){
   out.recipes = (out.recipes||[]).map(r => ({slots:["lunch","dinner"], notes:"", cold:false, category:"", protein:"", diet:"", ...r}));
   if (out.settings.catRepeat === undefined) out.settings.catRepeat = 2;
   out.shelf = out.shelf || {};
+  // fields from the shared-library feature, which no longer exists
+  ["libRepo","libPath","libName","libUrl","libSources","myLibGist","myLibAt"].forEach(k=>delete out[k]);
   if (s.shopDays && !s.bigDays){ out.settings.bigDays = s.shopDays; }   // one shopping list became two
   out.settings.bigEvery = out.settings.bigEvery || 1;
   if (out.settings.smallOn === undefined) out.settings.smallOn = true;
@@ -775,10 +754,18 @@ function save(){
    optional sync through a private gist
    the token lives in its own key so it can never reach an export
    ============================================================ */
-const KEY_SYNC = "prepboard:sync", GIST_FILE = "prep-board.json";
+const KEY_SYNC = "foodify:sync", OLDKEY_SYNC = "prepboard:sync", GIST_FILE = "foodify.json";
 let SY = {token:"", gist:"", auto:true, lastSync:0};
 async function loadSync(){
-  try{ const r = await store.get(KEY_SYNC); if (r) SY = {...SY, ...JSON.parse(r.value)}; }catch(e){}
+  for (const k of [KEY_SYNC, OLDKEY_SYNC]){
+    try{
+      const r = await store.get(k);
+      if (!r) continue;
+      SY = {...SY, ...JSON.parse(r.value)};
+      if ("libToken" in SY){ delete SY.libToken; saveSync(); }   // credential for a removed feature
+      return;
+    }catch(e){}
+  }
 }
 async function saveSync(){ try{ await store.set(KEY_SYNC, JSON.stringify(SY)); }catch(e){} }
 
@@ -793,7 +780,7 @@ async function gistCall(path, opts={}){
   if (!res.ok) throw new Error("http");
   return res.json();
 }
-const syncPayload = () => JSON.stringify({app:"prep-board", version:2, updatedAt:S.updatedAt||0, data:S}, null, 2);
+const syncPayload = () => JSON.stringify({app:"foodify", version:2, updatedAt:S.updatedAt||0, data:S}, null, 2);
 
 function syncErr(e){
   const T = t();
@@ -804,7 +791,7 @@ async function syncCreate(){
   if (!SY.token) return toast(T.syncNoToken);
   try{
     const g = await gistCall("", {method:"POST", body:JSON.stringify({
-      description:"Prep Board", public:false, files:{[GIST_FILE]:{content:syncPayload()}}})});
+      description:"Foodify", public:false, files:{[GIST_FILE]:{content:syncPayload()}}})});
     SY.gist = g.id; SY.lastSync = Date.now(); await saveSync();
     renderSettings(); toast(T.syncCreated);
   }catch(e){ toast(syncErr(e)); }
@@ -1144,7 +1131,7 @@ function buildTrips(sessions){
 let PLAN=null;
 function refresh(){
   PLAN = buildPlan();
-  renderChrome(); renderPlan(); renderShop(); renderRecipes(); renderLibrary(); renderPantry(); renderSettings();
+  renderChrome(); renderPlan(); renderShop(); renderRecipes(); renderPantry(); renderSettings();
 }
 function renderChrome(){
   document.documentElement.lang = S.lang;
@@ -1686,8 +1673,6 @@ function saveRecipe(){
 /* ============================================================
    shared library — read-only, anything fetched is untrusted
    ============================================================ */
-let LIB = null, LF = {cat:"", prot:"", q:""}, libSel = new Set();
-
 const clip = (v,n) => typeof v==="string" ? v.trim().slice(0,n) : "";
 const num  = (v,lo,hi,dflt) => { const n = parseFloat(v); return isFinite(n) && n>=lo && n<=hi ? n : dflt; };
 
@@ -1726,74 +1711,14 @@ function sanitizeRecipe(raw){
     ingredients,
   };
 }
-function readLibrary(text){
-  let parsed;
-  try{ parsed = JSON.parse(text); }catch(e){ return null; }
-  const list = Array.isArray(parsed) ? parsed
-             : Array.isArray(parsed.recipes) ? parsed.recipes
-             : (parsed.data && Array.isArray(parsed.data.recipes)) ? parsed.data.recipes
-             : null;
-  if (!list) return null;
-  const recipes = list.slice(0,500).map(sanitizeRecipe).filter(Boolean);
-  if (!recipes.length) return null;
-  return {name: clip(parsed.name, 60), recipes};
-}
-async function loadLibrary(){
-  const T = t();
-  const url = (document.getElementById("liburl")||{}).value || "";
-  S.libUrl = url.trim(); save();
-  if (!S.libUrl) return toast(T.libBad);
-  try{
-    const res = await fetch(S.libUrl, {headers:{Accept:"application/json"}});
-    if (!res.ok) throw new Error(res.status);
-    const lib = readLibrary(await res.text());
-    if (!lib) return toast(T.libBad);
-    LIB = lib; libSel = new Set(); renderLibrary();
-  }catch(e){ toast(T.libFail); }
-}
-function pasteLibrary(){
-  const T = t();
-  const box = document.getElementById("libjson");
-  const lib = readLibrary((box ? box.value : "").trim());
-  if (!lib) return toast(T.libBad);
-  LIB = lib; libSel = new Set(); renderLibrary();
-}
 const mine = () => new Set(S.recipes.map(r=>r.name.trim().toLowerCase()));
-function libMatches(r){
-  const q = LF.q.trim().toLowerCase();
-  if (q && !(r.name+" "+r.category+" "+r.protein+" "+r.ingredients.map(i=>i.name).join(" ")).toLowerCase().includes(q)) return false;
-  if (LF.cat && (r.category||"") !== LF.cat) return false;
-  if (LF.prot === "__veg"){ if (!r.diet) return false; }
-  else if (LF.prot === "__vegan"){ if (r.diet !== "vegan") return false; }
-  else if (LF.prot && (r.protein||"") !== LF.prot) return false;
-  return true;
-}
-function setLibFilter(kind,val){ LF[kind] = (LF[kind]===val) ? "" : val; renderLibrary(); }
-function setLibQuery(v){ LF.q = v; renderLibrary(); }
-function toggleLibPick(id){ libSel.has(id) ? libSel.delete(id) : libSel.add(id); renderLibrary(); }
-
-function addFromLibrary(ids){
-  const T = t();
-  if (!ids.length) return toast(T.libNothingPicked);
-  const have = mine();
-  let n = 0;
-  for (const id of ids){
-    const r = LIB.recipes.find(x=>x.id===id);
-    if (!r || have.has(r.name.trim().toLowerCase())) continue;
-    S.recipes.push({...r, id: uid()});
-    have.add(r.name.trim().toLowerCase());
-    n++;
-  }
-  libSel = new Set();
-  save(); refresh(); toast(T.libAdded(n));
-}
 
 /* ---------- share one recipe as a link ---------- */
 const b64  = str => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const unb64 = str => new TextDecoder().decode(Uint8Array.from(atob(str.replace(/-/g,"+").replace(/_/g,"/")), c=>c.charCodeAt(0)));
 function shareRecipe(id){
   const T = t();
-  const r = S.recipes.find(x=>x.id===id) || (LIB && LIB.recipes.find(x=>x.id===id));
+  const r = S.recipes.find(x=>x.id===id);
   if (!r) return;
   const {id:_drop, ...rest} = r;
   const link = location.origin + location.pathname + "#r=" + b64(JSON.stringify(rest));
@@ -1829,108 +1754,7 @@ function acceptShared(json){
   closeMeal(); save(); refresh(); go("recipes"); toast(t().libAdded(1));
 }
 
-/* ---------- publish your own shelf ---------- */
-function publishSheet(){
-  const T = t();
-  const payload = JSON.stringify({
-    format:"prep-board-library", version:1, name:"",
-    recipes: S.recipes.map(({id, ...r})=>r),
-  }, null, 2);
-  document.getElementById("modal").innerHTML = `
-    <div class="scrim" onclick="if(event.target===this)closeMeal()">
-      <div class="sheet" role="dialog" aria-modal="true">
-        <button class="x" onclick="closeMeal()" aria-label="×">×</button>
-        <p class="eyebrow">${T.libTitle}</p>
-        <h2>${T.libPublishTitle}</h2>
-        <p class="sub" style="margin:6px 0 12px">${T.libPublishSub}</p>
-        <textarea id="pub" class="mono" rows="10" readonly onclick="this.select()">${esc(payload)}</textarea>
-        <div class="row" style="margin-top:14px">
-          <button class="btn" onclick="downloadText('library.json', document.getElementById('pub').value)">${T.download}</button>
-          <button class="btn ghost" onclick="copyText(document.getElementById('pub').value)">${T.copyJson}</button>
-        </div>
-      </div></div>`;
-}
-function downloadText(filename, text){
-  try{
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([text], {type:"application/json"}));
-    a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-  }catch(e){ toast(t().downloadBlocked); }
-}
-function copyText(text){ navigator.clipboard.writeText(text).then(()=>toast(t().copied), ()=>toast(t().copyBlocked)); }
-
-function renderLibrary(){
-  const el = document.getElementById("tab-library"), T = t();
-  const source = `
-    <div class="card" style="margin-bottom:16px">
-      <div class="field" style="margin-bottom:10px">
-        <label for="liburl">${T.libAddr}</label>
-        <div class="row"><input id="liburl" type="text" style="flex:1;min-width:220px" value="${esc(S.libUrl||"")}"
-          placeholder="https://raw.githubusercontent.com/user/prep-board-recipes/main/library.json">
-          <button class="btn" onclick="loadLibrary()">${T.libLoad}</button></div>
-      </div>
-      <details><summary>${T.libPasteLbl}</summary>
-        <textarea id="libjson" class="mono" rows="5" style="margin-top:8px"></textarea>
-        <button class="btn ghost small" style="margin-top:8px" onclick="pasteLibrary()">${T.libLoad}</button>
-      </details>
-    </div>`;
-
-  if (!LIB){
-    el.innerHTML = `
-      <div class="spread"><div><p class="eyebrow">${T.libEyebrow}</p><h2>${T.libTitle}</h2>
-        <p class="sub" style="margin:4px 0 0">${T.libSub}</p></div>
-        <button class="btn ghost small" onclick="publishSheet()">${T.libPublish}</button></div>
-      ${source}
-      <div class="empty"><strong>${T.libEmpty}</strong>${T.libEmptyBody}</div>`;
-    return;
-  }
-
-  const have = mine();
-  const cats  = [...new Set(LIB.recipes.map(r=>(r.category||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  const meats = [...new Set(LIB.recipes.map(r=>(r.protein||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  const chip = (label, kind, val) =>
-    `<button class="fchip" aria-pressed="${LF[kind]===val}" onclick="setLibFilter('${kind}','${esc(val).replace(/'/g,"\\'")}')">${esc(label)}</button>`;
-  const shown = LIB.recipes.filter(libMatches);
-
-  const cards = shown.map(r=>{
-    const already = have.has(r.name.trim().toLowerCase());
-    const picked = libSel.has(r.id);
-    return `<div class="rec ${picked?"picked":""}">
-      <h3>${esc(r.name)}</h3>
-      ${(r.slots||[]).map(x=>`<span class="pill">${T.slot[x]}</span>`).join("")}
-      ${r.category?`<span class="pill">${esc(r.category)}</span>`:""}
-      ${r.diet?`<span class="pill veg">${r.diet==="vegan"?T.vegan:T.vegetarian}</span>`:""}
-      ${r.protein?`<span class="pill meat">${esc(r.protein)}</span>`:""}
-      <div class="meta">${T.perBatch(r.servings)}${r.author?" · "+esc(r.author):""}</div>
-      ${r.ingredients.slice(0,6).map(i=>`<div class="ing"><span class="q">${fmtNum(i.qty)} ${ulabel(i.unit,i.qty)}</span><span>${esc(i.name)}</span></div>`).join("")}
-      ${r.ingredients.length>6?`<div class="hint">+${r.ingredients.length-6}</div>`:""}
-      ${r.notes?`<details><summary>${T.method}</summary><div class="method" style="margin-top:8px">${esc(r.notes)}</div></details>`:""}
-      <div class="rec-actions">
-        ${already ? `<span class="pill">${T.libHave}</span>`
-                  : `<button class="btn ghost small" onclick="addFromLibrary(['${r.id}'])">${T.libAdd}</button>
-                     <label class="check"><input type="checkbox" ${picked?"checked":""} onchange="toggleLibPick('${r.id}')"></label>`}
-      </div></div>`;
-  }).join("");
-
-  el.innerHTML = `
-    <div class="spread"><div><p class="eyebrow">${T.libLoaded(LIB.recipes.length, LIB.name)}</p><h2>${T.libTitle}</h2></div>
-      <div class="row">
-        <button class="btn ghost small" onclick="publishSheet()">${T.libPublish}</button>
-        <button class="btn small" onclick="addFromLibrary([...libSel])" ${libSel.size?"":"disabled"}>${T.libAddSel(libSel.size)}</button>
-      </div></div>
-    ${source}
-    <div class="field" style="max-width:340px"><label for="libq">${T.libSearch}</label>
-      <input id="libq" type="text" value="${esc(LF.q)}" oninput="setLibQuery(this.value)"></div>
-    <div class="filters">
-      <div class="frow"><span class="flabel">${T.filterCat}</span>${chip(T.filterAll,"cat","")}${cats.map(c=>chip(c,"cat",c)).join("")}</div>
-      <div class="frow"><span class="flabel">${T.filterProt}</span>${chip(T.filterAll,"prot","")}${meats.map(m=>chip(m,"prot",m)).join("")}${chip(T.filterVeg,"prot","__veg")}${chip(T.filterVegan,"prot","__vegan")}</div>
-    </div>
-    ${shown.length ? `<div class="rec-list">${cards}</div>` : `<div class="empty"><strong>${T.libNoneMatch}</strong></div>`}`;
-}
-
-/* ---------- pantry ---------- */
+/* ---------- pantry ---------- *//* ---------- pantry ---------- */
 function renderPantry(){
   const el = document.getElementById("tab-pantry"), T = t();
   const ings = allIngredients();
@@ -2145,7 +1969,7 @@ function resetAll(){
 
 /* ---------- backup: export / import ---------- */
 function exportPayload(){
-  return JSON.stringify({app:"prep-board", version:2, exported:new Date().toISOString(), data:S}, null, 2);
+  return JSON.stringify({app:"foodify", version:2, exported:new Date().toISOString(), data:S}, null, 2);
 }
 function exportSheet(){
   const T = t(), json = exportPayload();
@@ -2169,7 +1993,7 @@ function downloadJson(){
     const blob = new Blob([exportPayload()], {type:"application/json"});
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "prep-board-"+today()+".json";
+    a.download = "foodify-"+today()+".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
   }catch(e){ toast(T.downloadBlocked); }
@@ -2196,7 +2020,7 @@ function importSheet(){
         </div>
         <div class="field">
           <label for="imp">${T.orPaste}</label>
-          <textarea id="imp" class="mono" rows="6" placeholder='{"app":"prep-board", ...}'></textarea>
+          <textarea id="imp" class="mono" rows="6" placeholder='{"app":"foodify", ...}'></textarea>
         </div>
         <div class="field">
           <label>${T.mode}</label>
