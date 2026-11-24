@@ -5,11 +5,12 @@
 <meta name="theme-color" content="#0f201c">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Foodify">
 <meta name="application-name" content="Foodify">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,7 +79,7 @@ textarea.mono{font-family:var(--mono);font-size:13px;line-height:1.7}
 .wd[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 .wd.shop[aria-pressed="true"]{background:var(--paprika);border-color:var(--paprika)}
 
-.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:8px}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:8px}
 .strip div{background:var(--tile);padding:13px 15px}
 .strip .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 .strip .v{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01em}
@@ -216,6 +217,9 @@ td input,td select{padding:6px 8px;font-size:13px}
   .tile{min-height:0}
   .tile.pad{display:none}
   h1{font-size:24px}
+  .strip div{padding:11px 12px}
+  .strip .v{font-size:20px}
+  nav button{padding:10px 12px}
   .drow{flex-direction:column;gap:6px}
   .dwhen{flex-direction:row;gap:8px;width:auto;align-items:baseline}
   .dside{width:100%}
@@ -404,6 +408,7 @@ const L = {
     importAsk:n=>"Add “"+n+"” to your recipes?", importBtn:"Add recipe",
     keepTitle:"Keeping times", keepSub:"How long each thing lasts. This decides which shop it can go on — raise a number and it moves to the big run.",
     thKeeps:"Keeps", days:"days", keepNone:"Add recipes and the ingredients show up here.",
+    updateReady:"A new version is ready — reopen the app to use it.",
     syncTitle:"Sync between devices",
     syncSub:"Keeps your recipes, plan and pantry the same on your phone and your laptop, through a private GitHub gist. Optional — the app works without it.",
     syncToken:"GitHub token", syncTokenHint:"A classic token with the gist scope and nothing else. It is kept in this browser only — never in the app file, never in your exports, never sent anywhere but GitHub.",
@@ -560,6 +565,7 @@ const L = {
     importAsk:n=>"Přidat „"+n+"“ do vašich receptů?", importBtn:"Přidat recept",
     keepTitle:"Trvanlivost", keepSub:"Jak dlouho co vydrží. Podle toho se pozná, na který nákup se položka vejde — když číslo zvýšíte, přesune se na velký nákup.",
     thKeeps:"Vydrží", days:"dní", keepNone:"Přidejte recepty a suroviny se objeví tady.",
+    updateReady:"Je připravená nová verze — zavřete a otevřete aplikaci.",
     syncTitle:"Synchronizace mezi zařízeními",
     syncSub:"Drží recepty, plán i spíž stejné na telefonu i na notebooku — přes soukromý GitHub gist. Nepovinné, aplikace funguje i bez toho.",
     syncToken:"GitHub token", syncTokenHint:"Klasický token s oprávněním gist a ničím jiným. Zůstane jen v tomhle prohlížeči — nikdy není v souboru aplikace, v exportech ani se neposílá nikam kromě GitHubu.",
@@ -2178,5 +2184,20 @@ function loadSamples(){
   refresh();
   checkSharedLink();
   if (SY.auto && SY.token && SY.gist) syncPull(true);
+
+  // offline support; also what makes the browser offer to install the app
+  if ("serviceWorker" in navigator && location.protocol !== "file:"){
+    try{
+      const reg = await navigator.serviceWorker.register("sw.js");
+      reg.addEventListener("updatefound", ()=>{
+        const sw = reg.installing;
+        if (!sw) return;
+        sw.addEventListener("statechange", ()=>{
+          // a newer version is ready and an older one is still running this tab
+          if (sw.state === "installed" && navigator.serviceWorker.controller) toast(t().updateReady);
+        });
+      });
+    }catch(e){ /* unsupported or blocked; the app works without it */ }
+  }
 })();
 </script>
