@@ -159,6 +159,7 @@ button.mini:hover{text-decoration:underline}
 .sheet .x{float:right;background:transparent;border:0;font-size:22px;line-height:1;color:var(--muted);cursor:pointer}
 .method{white-space:pre-wrap;font-size:14px;line-height:1.6;color:var(--ink-2)}
 .pill.veg{color:#3f6b4c;border-color:var(--sage);background:var(--sage-soft)}
+.pill.new{color:#5b4a8a;border-color:#b3a7d9;background:#f1eefa}
 .pill.meat{color:var(--paprika);border-color:var(--paprika);background:var(--paprika-soft)}
 .pill{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin:0 5px 4px 0}
 
@@ -258,6 +259,7 @@ td input,td select{padding:6px 8px;font-size:13px}
   <section id="tab-settings" class="tab" hidden></section>
 </div>
 <div id="modal"></div>
+<input id="recfile" type="file" accept=".json,application/json" multiple hidden onchange="pickRecipeFiles(this.files);this.value=''">
 
 <script>
 /* ============================================================
@@ -409,6 +411,17 @@ const L = {
     keepTitle:"Keeping times", keepSub:"How long each thing lasts. This decides which shop it can go on — raise a number and it moves to the big run.",
     thKeeps:"Keeps", days:"days", keepNone:"Add recipes and the ingredients show up here.",
     updateReady:"A new version is ready — reopen the app to use it.",
+    testedLabel:"Tested — I've cooked this and it works",
+    testedHint:"Leave unticked for recipes you haven't tried yet.",
+    untested:"Not tried yet", untestedShort:"not tried",
+    markTested:"I've cooked it — mark as tested", markedTested:n=>"“"+n+"” marked as tested",
+    useUntested:"Plan recipes I haven't tried yet",
+    useUntestedHint:n=>"Untick to plan only tested recipes. You can still pick an untried one for a particular day by hand."+(n?" You have "+n+" untried.":""),
+    filterUntested:"Not tried yet",
+    impFromFile:"Load from file", impFilled:"Loaded — check it and press Save",
+    impNone:"No recipes found in that file", impUnreadable:f=>"Could not read "+f,
+    impAddedN:n=>n===0?"Nothing new":n+(n===1?" recipe imported":" recipes imported"),
+    expOne:"Download JSON",
     syncTitle:"Sync between devices",
     syncSub:"Keeps your recipes, plan and pantry the same on your phone and your laptop, through a private GitHub gist. Optional — the app works without it.",
     syncToken:"GitHub token", syncTokenHint:"A classic token with the gist scope and nothing else. It is kept in this browser only — never in the app file, never in your exports, never sent anywhere but GitHub.",
@@ -566,6 +579,17 @@ const L = {
     keepTitle:"Trvanlivost", keepSub:"Jak dlouho co vydrží. Podle toho se pozná, na který nákup se položka vejde — když číslo zvýšíte, přesune se na velký nákup.",
     thKeeps:"Vydrží", days:"dní", keepNone:"Přidejte recepty a suroviny se objeví tady.",
     updateReady:"Je připravená nová verze — zavřete a otevřete aplikaci.",
+    testedLabel:"Vyzkoušený — už jsem to vařil(a) a funguje to",
+    testedHint:"Nechte nezaškrtnuté u receptů, které jste ještě nezkoušeli.",
+    untested:"Nevyzkoušeno", untestedShort:"nevyzkoušeno",
+    markTested:"Uvařeno — označit jako vyzkoušené", markedTested:n=>"„"+n+"“ označeno jako vyzkoušené",
+    useUntested:"Plánovat i nevyzkoušené recepty",
+    useUntestedHint:n=>"Po odškrtnutí se plánují jen vyzkoušené recepty. Nevyzkoušený si pořád můžete na konkrétní den vybrat ručně."+(n?" Nevyzkoušených máte "+(n===1?"1":n)+".":""),
+    filterUntested:"Nevyzkoušené",
+    impFromFile:"Načíst ze souboru", impFilled:"Načteno — zkontrolujte a uložte",
+    impNone:"V souboru nejsou žádné recepty", impUnreadable:f=>"Soubor "+f+" se nepodařilo přečíst",
+    impAddedN:n=>n===0?"Nic nového":n===1?"Importován 1 recept":n<5?"Importovány "+n+" recepty":"Importováno "+n+" receptů",
+    expOne:"Stáhnout JSON",
     syncTitle:"Synchronizace mezi zařízeními",
     syncSub:"Drží recepty, plán i spíž stejné na telefonu i na notebooku — přes soukromý GitHub gist. Nepovinné, aplikace funguje i bez toho.",
     syncToken:"GitHub token", syncTokenHint:"Klasický token s oprávněním gist a ničím jiným. Zůstane jen v tomhle prohlížeči — nikdy není v souboru aplikace, v exportech ani se neposílá nikam kromě GitHubu.",
@@ -685,7 +709,7 @@ function blankState(){
     lang: (navigator.language||"en").toLowerCase().startsWith("cs") ? "cs" : "en",
     recipes: [], pantry: [], shelf: {},   // ingredient name -> days it keeps
     settings: {
-      start: today(), horizon: 28, people: 2, noRepeat: 7, catRepeat: 2, capUnit: "meals",
+      start: today(), horizon: 28, people: 2, noRepeat: 7, catRepeat: 2, capUnit: "meals", useUntested: true,
       bigDays: [5], bigEvery: 1, smallOn: true, stockMode: "before",
       slots: {
         breakfast:{on:false, cookDays:[0,1,2,3,4,5,6], maxEat:1},
@@ -733,7 +757,8 @@ function migrate(old){
     out.settings.slots.dinner.maxEat = out.settings.slots.dinner.maxEat * (carried ? 2 : 1);
     out.settings.capUnit = "meals";
   }
-  out.recipes = (out.recipes||[]).map(r => ({slots:["lunch","dinner"], notes:"", cold:false, category:"", protein:"", diet:"", ...r}));
+  out.recipes = (out.recipes||[]).map(r => ({slots:["lunch","dinner"], notes:"", cold:false, category:"", protein:"", diet:"", tested:true, ...r}));
+  if (out.settings.useUntested === undefined) out.settings.useUntested = true;
   if (out.settings.catRepeat === undefined) out.settings.catRepeat = 2;
   out.shelf = out.shelf || {};
   // fields from the shared-library feature, which no longer exists
@@ -882,11 +907,13 @@ function bigDates(){
   return [...out].sort();
 }
 
-const recipesFor = slot => S.recipes.filter(r => (r.slots||["lunch","dinner"]).includes(slot));
+// untested recipes take part only when the setting allows; "all" ignores the setting
+const usable = r => S.settings.useUntested !== false || r.tested !== false;
+const recipesFor = (slot, all) => S.recipes.filter(r => (r.slots||["lunch","dinner"]).includes(slot) && (all || usable(r)));
 const coldOn = () => S.settings.slots.dinner.on && S.settings.slots.dinner.cold;
-const coldPool = () => recipesFor("dinner").filter(r => r.cold);
+const coldPool = all => recipesFor("dinner", all).filter(r => r.cold);
 // cold-tagged recipes are held back for cold dinner days — unless the mode is off, then they are ordinary dinners
-const hotPool = slot => (slot==="dinner" && coldOn()) ? recipesFor(slot).filter(r=>!r.cold) : recipesFor(slot);
+const hotPool = (slot, all) => (slot==="dinner" && coldOn()) ? recipesFor(slot, all).filter(r=>!r.cold) : recipesFor(slot, all);
 
 const catOf = r => (r && r.category || "").trim().toLowerCase();
 const meatOf = r => (r && r.protein || "").trim().toLowerCase();
@@ -928,7 +955,7 @@ function planSlot(slot, cfg, pool, dates, cells, sessions, perDay, memo, maxSpan
     let j=i+1; while (j<n && !isCook(j)) j++;
     const bridge = Math.min(j-i, n-i);
     const pinned = S.pins[dates[i]+"|"+slot];
-    let r = pinned ? pool.find(x=>x.id===pinned) : null;
+    let r = pinned ? (pool.find(x=>x.id===pinned) || hotPool(slot, true).find(x=>x.id===pinned)) : null;
     if (!r) r = pickDish(pool, i, memo, st.noRepeat, st.catRepeat);
     // the cap is in meals; one cooking day may feed more than one meal
     const capMeals = Math.min(cfg.maxEat, r.maxEat || cfg.maxEat);
@@ -976,7 +1003,7 @@ function buildPlan(){
     else for (let i=0;i<n;i++){
       if (cells[dates[i]].dinner) continue;
       const pinned = S.pins[dates[i]+"|cold"];
-      const r = (pinned && cold.find(x=>x.id===pinned)) || pickDish(cold, i, memo, st.noRepeat, st.catRepeat);
+      const r = (pinned && (cold.find(x=>x.id===pinned) || coldPool(true).find(x=>x.id===pinned))) || pickDish(cold, i, memo, st.noRepeat, st.catRepeat);
       const sid = "cold@"+dates[i];
       sessions.push({id:sid, kind:"cold", slot:"dinner", date:dates[i], recipeId:r.id, span:1, consumers:1, cap:1});
       cells[dates[i]].dinner = {kind:"cold", recipeId:r.id, sid, span:1, dayNo:1};
@@ -1298,7 +1325,7 @@ function openMeal(sid){
     if (c && c.sid===sid) eaten.push(T.slot[slot].toLowerCase()+" "+human(d));
   }
   const isCold = s.kind==="cold", thisSid = s.id;
-  const pool = isCold ? coldPool() : hotPool(s.slot);
+  const pool = isCold ? coldPool(true) : hotPool(s.slot, true);
   const pinKey = s.date+"|"+(isCold ? "cold" : s.slot);
   document.getElementById("modal").innerHTML = `
     <div class="scrim" onclick="if(event.target===this)closeMeal()">
@@ -1309,7 +1336,8 @@ function openMeal(sid){
         <p class="sub" style="margin:8px 0 14px">
           <span class="pill">${T.pBatch(fmtNum(s.factor))}</span>
           <span class="pill">${T.pPortions(fmtNum(s.made))}</span>
-          <span class="pill">${T.pFeeds(s.consumers)}</span>${r.category?`<span class="pill">${esc(r.category)}</span>`:""}${r.diet?`<span class="pill veg">${r.diet==="vegan"?T.vegan:T.vegetarian}</span>`:""}${r.protein?`<span class="pill meat">${esc(r.protein)}</span>`:""}</p>
+          <span class="pill">${T.pFeeds(s.consumers)}</span>${r.category?`<span class="pill">${esc(r.category)}</span>`:""}${r.diet?`<span class="pill veg">${r.diet==="vegan"?T.vegan:T.vegetarian}</span>`:""}${r.protein?`<span class="pill meat">${esc(r.protein)}</span>`:""}${r.tested===false?`<span class="pill new">${T.untested}</span>`:""}</p>
+        ${r.tested===false?`<div class="row" style="margin:-4px 0 14px"><button class="btn ghost small" onclick="markTested('${r.id}','${s.id}')">${T.markTested}</button></div>`:""}
         <h3>${T.ingScaled}</h3>
         ${r.ingredients.map(i=>{
           const [base,f]=BASE[i.unit]||["pcs",1];
@@ -1327,7 +1355,7 @@ function openMeal(sid){
           </div>
           <select id="swap" onchange="pin('${pinKey}', this.value)">
             <option value="">${T.auto}</option>
-            ${pool.map(x=>`<option value="${x.id}" ${x.id===r.id&&S.pins[pinKey]?"selected":""}>${esc(x.name)}</option>`).join("")}
+            ${pool.map(x=>`<option value="${x.id}" ${x.id===r.id&&S.pins[pinKey]?"selected":""}>${esc(x.name)}${x.tested===false?" — "+T.untestedShort:""}</option>`).join("")}
           </select>
         </div>
       </div></div>`;
@@ -1487,6 +1515,7 @@ function matchesFilter(r){
   if (F.prot === "__veg"){ if (!r.diet) return false; }
   else if (F.prot === "__vegan"){ if (r.diet !== "vegan") return false; }
   else if (F.prot === "__nometa"){ if (meat || r.diet) return false; }
+  else if (F.prot === "__untested"){ if (r.tested !== false) return false; }
   else if (F.prot && meat !== F.prot) return false;
   return true;
 }
@@ -1501,7 +1530,7 @@ function renderRecipes(){
   const card = r => `
     <div class="rec">
       <h3>${esc(r.name)}</h3>
-      ${(r.slots||[]).map(s=>`<span class="pill">${T.slot[s]}</span>`).join("")}${r.cold?`<span class="pill">${T.coldPill}</span>`:""}${r.diet?`<span class="pill veg">${r.diet==="vegan"?T.vegan:T.vegetarian}</span>`:""}${r.protein?`<span class="pill meat">${esc(r.protein)}</span>`:""}
+      ${(r.slots||[]).map(s=>`<span class="pill">${T.slot[s]}</span>`).join("")}${r.cold?`<span class="pill">${T.coldPill}</span>`:""}${r.diet?`<span class="pill veg">${r.diet==="vegan"?T.vegan:T.vegetarian}</span>`:""}${r.protein?`<span class="pill meat">${esc(r.protein)}</span>`:""}${r.tested===false?`<span class="pill new">${T.untested}</span>`:""}
       <div class="meta">${T.perBatch(r.servings)}${r.maxEat?` · ${T.maxRow(r.maxEat)}`:""}</div>
       ${r.ingredients.map(i=>`<div class="ing"><span class="q">${fmtNum(i.qty)} ${ulabel(i.unit, i.qty)}</span><span>${esc(i.name)}</span></div>`).join("")}
       ${r.notes && r.notes.trim() ? `<details><summary>${T.method}</summary><div class="method" style="margin-top:8px">${esc(r.notes)}</div></details>`:""}
@@ -1509,6 +1538,7 @@ function renderRecipes(){
         <button class="btn ghost small" onclick="edit('${r.id}')">${T.edit}</button>
         <button class="btn danger small" onclick="del('${r.id}')">${T.del}</button>
         <button class="btn ghost small" onclick="shareRecipe('${r.id}')">${T.libShare}</button>
+        <button class="btn ghost small" onclick="exportRecipe('${r.id}')">${T.expOne}</button>
       </div></div>`;
 
   // filter bar: one row for the dish base, one for meat and diet
@@ -1524,7 +1554,8 @@ function renderRecipes(){
       <div class="frow"><span class="flabel">${T.filterProt}</span>
         ${chip(T.filterAll,"prot","")}${meats.map(m=>chip(m,"prot",m)).join("")}
         ${chip(T.filterVeg,"prot","__veg")}${chip(T.filterVegan,"prot","__vegan")}
-        ${S.recipes.some(r=>!(r.protein||"").trim() && !r.diet)?chip(T.filterNoMeat,"prot","__nometa"):""}</div>
+        ${S.recipes.some(r=>!(r.protein||"").trim() && !r.diet)?chip(T.filterNoMeat,"prot","__nometa"):""}
+        ${S.recipes.some(r=>r.tested===false)?chip(T.filterUntested,"prot","__untested"):""}</div>
     </div>` : "";
 
   const shown = S.recipes.filter(matchesFilter);
@@ -1549,7 +1580,7 @@ function renderRecipes(){
 }
 function edit(id){
   editing = id ? JSON.parse(JSON.stringify(S.recipes.find(r=>r.id===id)))
-               : {id:uid(), name:"", servings:4, maxEat:null, slots:["lunch","dinner"], cold:false, category:"", protein:"", diet:"", notes:"", ingredients:[]};
+               : {id:uid(), name:"", servings:4, maxEat:null, slots:["lunch","dinner"], cold:false, category:"", protein:"", diet:"", tested:false, notes:"", ingredients:[]};
   editing.slots = editing.slots || ["lunch","dinner"];
   renderRecipes();
   document.getElementById("editor").scrollIntoView({block:"nearest"});
@@ -1571,7 +1602,10 @@ function renderEditor(){
     </tr>`).join("");
   document.getElementById("editor").innerHTML = `
     <div class="card" style="margin-bottom:20px">
-      <h3>${e.name ? T.editX(esc(e.name)) : T.newRecipe}</h3>
+      <div class="spread" style="margin:0 0 12px;align-items:center">
+        <h3 style="margin:0">${e.name ? T.editX(esc(e.name)) : T.newRecipe}</h3>
+        <button class="btn ghost small" onclick="document.getElementById('recfile').click()">${T.impFromFile}</button>
+      </div>
       <div class="grid2">
         <div class="field"><label for="rn">${T.dishName}</label>
           <input id="rn" type="text" value="${esc(e.name)}" placeholder="${T.dishPh}" oninput="editing.name=this.value"></div>
@@ -1597,6 +1631,10 @@ function renderEditor(){
       <div class="field">
         <label class="check"><input type="checkbox" ${e.cold?"checked":""} onchange="editing.cold=this.checked">${T.coldLabel}</label>
         <div class="hint">${T.coldLabelHint}</div>
+      </div>
+      <div class="field">
+        <label class="check"><input type="checkbox" ${e.tested?"checked":""} onchange="editing.tested=this.checked">${T.testedLabel}</label>
+        <div class="hint">${T.testedHint}</div>
       </div>
       <div class="field">
         <label>${T.dietLabel}</label>
@@ -1633,6 +1671,13 @@ function guessProtein(){
   const g = guessMeat(editing);
   if (!g) return toast(t().guessNone);
   editing.protein = g; renderEditor();
+}
+function markTested(id, sid){
+  const r = S.recipes.find(x=>x.id===id);
+  if (!r) return;
+  r.tested = true;
+  save(); refresh(); toast(t().markedTested(r.name));
+  if (sid) openMeal(sid);
 }
 function setDiet(kind,on){
   if (kind==="vegan") editing.diet = on ? "vegan" : (editing.diet ? "vegetarian" : "");
@@ -1710,6 +1755,7 @@ function sanitizeRecipe(raw){
     diet: raw.diet==="vegan" ? "vegan" : raw.diet==="vegetarian" ? "vegetarian" : "",
     slots: slots.length ? slots : ["lunch","dinner"],
     cold: !!raw.cold,
+    tested: raw.tested === true,
     maxEat: raw.maxEat ? Math.round(num(raw.maxEat, 1, 14, 1)) : null,
     notes: clip(raw.notes, 4000),
     author: clip(raw.author, 60),
@@ -1807,7 +1853,7 @@ function setShelf(key, v){
 
 /* ---------- settings ---------- */
 function slotCard(slot){
-  const T = t(), cfg = S.settings.slots[slot], count = recipesFor(slot).length;
+  const T = t(), cfg = S.settings.slots[slot], count = recipesFor(slot, true).length;
   const leftovers = slot==="lunch" && cfg.mode==="leftovers";
   const carries = slot==="dinner" && !cfg.cold && S.settings.slots.lunch.on && S.settings.slots.lunch.mode==="leftovers";
   // what the plan actually reaches — the cooking days may cap it before the number does
@@ -1864,6 +1910,8 @@ function renderSettings(){
           <input id="cr" type="number" min="0" max="14" value="${st.catRepeat}" onchange="setNum('catRepeat',+this.value)">
           <div class="hint">${T.catRepeatHint} ${T.catRepeatHard}</div></div>
       </div>
+      <label class="check" style="margin-top:4px"><input type="checkbox" ${st.useUntested!==false?"checked":""} onchange="setNum('useUntested',this.checked)">${T.useUntested}</label>
+      <div class="hint">${T.useUntestedHint(S.recipes.filter(r=>r.tested===false).length)}</div>
     </div>
     <p class="eyebrow" style="margin:22px 0 8px">${T.threeMeals}</p>
     ${SLOTS.map(slotCard).join("")}
@@ -2053,23 +2101,25 @@ function doImport(){
   let parsed;
   try{ parsed = JSON.parse(raw); }catch(e){ return toast(T.importBad); }
 
-  const incoming = parsed && parsed.data ? parsed.data : parsed;   // wrapped or bare state
-  if (!incoming || !Array.isArray(incoming.recipes)) return toast(T.importBad);
-
   const mode = (document.querySelector('input[name="impmode"]:checked')||{}).value || "replace";
 
   if (mode === "merge"){
-    const have = new Set(S.recipes.map(r => r.name.trim().toLowerCase()));
+    const list = recipesFromJson(parsed);
+    if (!list.length) return toast(T.importBad);
+    const have = mine();
     let added = 0;
-    for (const r of incoming.recipes){
-      if (!r || !r.name || have.has(r.name.trim().toLowerCase())) continue;
-      S.recipes.push({...r, id: uid(), slots: r.slots || ["lunch","dinner"], notes: r.notes || ""});
+    for (const r of list){
+      if (have.has(r.name.trim().toLowerCase())) continue;
+      S.recipes.push({...r, id: uid()});
       have.add(r.name.trim().toLowerCase());
       added++;
     }
     closeMeal(); save(); refresh(); go("recipes");
     return toast(T.importAdded(added));
   }
+
+  const incoming = parsed && parsed.data ? parsed.data : parsed;   // a whole backup only
+  if (!incoming || !Array.isArray(incoming.recipes) || !incoming.settings) return toast(T.importBad);
 
   const lang = S.lang;
   S = migrate(incoming);
@@ -2079,6 +2129,62 @@ function doImport(){
   toast(T.importReplaced);
 }
 
+/* ---------- recipes from JSON files ----------
+   accepts one recipe, a list of recipes, a {recipes:[…]} file or a whole backup */
+function recipesFromJson(parsed){
+  if (!parsed || typeof parsed !== "object") return [];
+  const looksLikeRecipe = o => o && typeof o === "object" && typeof o.name === "string" && Array.isArray(o.ingredients);
+  let list;
+  if (Array.isArray(parsed)) list = parsed;
+  else if (looksLikeRecipe(parsed)) list = [parsed];
+  else if (Array.isArray(parsed.recipes)) list = parsed.recipes;
+  else if (parsed.data && Array.isArray(parsed.data.recipes)) list = parsed.data.recipes;
+  else return [];
+  return list.slice(0, 500).map(sanitizeRecipe).filter(Boolean);
+}
+const readText = f => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsText(f); });
+
+// one recipe fills the open form so you can check it before saving;
+// a file with several recipes adds them all at once
+async function pickRecipeFiles(files){
+  const T = t();
+  const found = [];
+  for (const f of [...(files||[])]){
+    try{ found.push(...recipesFromJson(JSON.parse(await readText(f)))); }
+    catch(e){ return toast(T.impUnreadable(f.name)); }
+  }
+  if (!found.length) return toast(T.impNone);
+
+  if (found.length === 1){
+    const keepId = editing ? editing.id : uid();
+    editing = {...found[0], id: keepId};
+    renderRecipes();
+    return toast(T.impFilled);
+  }
+  const have = mine();
+  let added = 0;
+  for (const r of found){
+    const key = r.name.trim().toLowerCase();
+    if (have.has(key)) continue;
+    S.recipes.push({...r, id: uid()}); have.add(key); added++;
+  }
+  editing = null;
+  save(); refresh();
+  toast(T.impAddedN(added));
+}
+function exportRecipe(id){
+  const r = S.recipes.find(x => x.id === id);
+  if (!r) return;
+  const {id:_, ...rest} = r;
+  const slug = r.name.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "recept";
+  try{
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(rest, null, 2)+"\n"], {type:"application/json"}));
+    a.download = slug + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  }catch(e){ toast(t().downloadBlocked); }
+}
 /* ---------- tabs ---------- */
 function go(tab){
   document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===tab));
@@ -2168,7 +2274,7 @@ const SAMPLE_DIET = {
 };
 function loadSamples(){
   for (const [name, servings, category, slots, notes, lines, cold] of SAMPLES[S.lang]){
-    S.recipes.push({id:uid(), name, servings, category, maxEat:null, slots, notes, cold:!!cold,
+    S.recipes.push({id:uid(), name, servings, category, maxEat:null, slots, notes, cold:!!cold, tested:true,
       diet: SAMPLE_DIET[name] || "",
       protein: SAMPLE_MEAT[name] ? MEAT_LABEL[S.lang][SAMPLE_MEAT[name]] : "",
       ingredients: lines.map(([qty,unit,n])=>({qty, unit: UNIT_ALIAS[unit]||unit, name:n, aisle:guessAisle(n)}))});

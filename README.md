@@ -51,6 +51,36 @@ Nothing is uploaded. Two things follow from that:
   using a token you create yourself. The token never leaves that browser and is not
   included in exports.
 
+## Recipe files
+
+Each recipe can be saved as a JSON file (**Stáhnout JSON** on its card). To load one, open
+**Přidat recept** and press **Načíst ze souboru** — the form fills in for you to check and save.
+
+```json
+{
+  "name": "Svíčková",
+  "servings": 6,
+  "category": "Knedlíky",
+  "protein": "Hovězí",
+  "diet": "",
+  "slots": ["dinner"],
+  "tested": false,
+  "notes": "Zeleninu a maso upéct, rozmixovat, přidat smetanu.",
+  "ingredients": [
+    { "qty": 1,   "unit": "kg", "name": "hovězí zadní" },
+    { "qty": 300, "unit": "g",  "name": "kořenová zelenina" },
+    { "qty": 250, "unit": "ml", "name": "smetana" }
+  ]
+}
+```
+
+Only `name` and at least one ingredient are required. `diet` is `""`, `"vegetarian"` or
+`"vegan"`; `slots` takes any of `breakfast`, `lunch`, `dinner`; `tested` is `true` only for
+a recipe you've already cooked — leave it out and the recipe comes in as untried; units are
+`g kg ml l pcs tbsp tsp bunch can pack`. Leave out `aisle` and Foodify guesses it from the
+ingredient name. A file can also hold a list of recipes — `[ {…}, {…} ]` — and backups and
+older library files work too.
+
 ## Updating
 
 Upload a new `index.html` over the old one. The service worker fetches the page from the
